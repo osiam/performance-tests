@@ -23,12 +23,18 @@
 
 package org.osiam.tests.performance;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
+import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseDataSourceConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -54,7 +60,7 @@ public class TestCase1 {
         }
     }
 
-    /*@After
+    @After
     public void teardownDb() throws SQLException, MalformedURLException, IOException, DatabaseUnitException {
         try (ConfigurableApplicationContext applicationContext = new ClassPathXmlApplicationContext("context.xml")) {
             IDatabaseConnection connection = new DatabaseDataSourceConnection(
@@ -70,7 +76,7 @@ public class TestCase1 {
         } catch (SQLException | DatabaseUnitException e) {
             e.printStackTrace();
         }
-    }*/
+    }
 
     @Test
     public void test() {
