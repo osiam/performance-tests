@@ -150,13 +150,13 @@
                             <goal>spawn</goal>
                         </goals>
                     </execution>
-                    <!-- <execution>
+                    <execution>
                         <id>Stop a spawned H2 TCP server</id>
                         <phase>post-integration-test</phase>
                         <goals>
                             <goal>stop</goal>
                         </goals>
-                    </execution> -->
+                    </execution>
                 </executions>
             </plugin>
 
