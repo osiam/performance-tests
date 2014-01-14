@@ -38,8 +38,8 @@
           <stringProp name="junitsampler.error">An unexpected error occured</stringProp>
           <stringProp name="junitsampler.error.code">9999</stringProp>
           <stringProp name="junitsampler.exec.setup">false</stringProp>
-          <stringProp name="junitsampler.append.error">false</stringProp>
-          <stringProp name="junitsampler.append.exception">false</stringProp>
+          <stringProp name="junitsampler.append.error">true</stringProp>
+          <stringProp name="junitsampler.append.exception">true</stringProp>
           <boolProp name="junitsampler.junit4">true</boolProp>
         </JUnitSampler>
         <hashTree/>

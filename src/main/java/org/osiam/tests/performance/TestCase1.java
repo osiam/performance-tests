@@ -23,9 +23,54 @@
 
 package org.osiam.tests.performance;
 
+import javax.sql.DataSource;
+
+import org.dbunit.database.DatabaseDataSourceConnection;
+import org.dbunit.database.IDatabaseConnection;
+import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.dbunit.operation.DatabaseOperation;
+import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class TestCase1 {
+
+    @Before
+    public void setupDb() {
+        try (ConfigurableApplicationContext applicationContext = new ClassPathXmlApplicationContext("context.xml")) {
+            IDatabaseConnection connection = new DatabaseDataSourceConnection(
+                    (DataSource) applicationContext.getBean("dataSource"));
+
+            try {
+                DatabaseOperation.CLEAN_INSERT.execute(connection,
+                        new FlatXmlDataSetBuilder().build(
+                                applicationContext.getResource("/database_seed.xml").getInputStream()));
+            } finally {
+                connection.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*@After
+    public void teardownDb() throws SQLException, MalformedURLException, IOException, DatabaseUnitException {
+        try (ConfigurableApplicationContext applicationContext = new ClassPathXmlApplicationContext("context.xml")) {
+            IDatabaseConnection connection = new DatabaseDataSourceConnection(
+                    (DataSource) applicationContext.getBean("dataSource"));
+
+            try {
+                DatabaseOperation.DELETE_ALL.execute(connection,
+                        new FlatXmlDataSetBuilder().build(
+                                applicationContext.getResource("/database_tear_down.xml").getInputStream()));
+            } finally {
+                connection.close();
+            }
+        } catch (SQLException | DatabaseUnitException e) {
+            e.printStackTrace();
+        }
+    }*/
 
     @Test
     public void test() {
