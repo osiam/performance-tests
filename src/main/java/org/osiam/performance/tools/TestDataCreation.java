@@ -67,7 +67,7 @@ public class TestDataCreation {
             try {
                 DatabaseOperation.CLEAN_INSERT.execute(connection,
                         new FlatXmlDataSetBuilder().build(
-                                applicationContext.getResource("/database_seed.xml").getInputStream()));
+                                applicationContext.getResource("/database_seed_minimal.xml").getInputStream()));
             } finally {
                 connection.close();
             }
