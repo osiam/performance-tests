@@ -572,7 +572,7 @@
                         <execution>
                             <id>start-jetty</id>
                             <goals>
-                                <goal>run-exploded</goal>
+                                <goal>start</goal>
                             </goals>
                             <configuration>
                                 <scanIntervalSeconds>0</scanIntervalSeconds>
