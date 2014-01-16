@@ -653,7 +653,7 @@
                     <transformationSets>
                         <transformationSet>
                             <dir>${project.build.directory}/jmeter/results</dir>
-                            <stylesheet>${project.basedir}/src/main/resources/jmeter-results-report_21.xsl</stylesheet>
+                            <stylesheet>${project.basedir}/src/main/resources/jmeter-results-report.xsl</stylesheet>
                             <outputDir>${project.build.directory}/jmeter-reports</outputDir>
                             <fileMappers>
                                 <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.RegExpFileMapper">
