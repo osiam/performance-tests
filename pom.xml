@@ -42,7 +42,6 @@
         <!-- OSIAM -->
         <version.org.osiam.server>0.16-SNAPSHOT</version.org.osiam.server>
         <version.org.osiam.connector4java>0.12-SNAPSHOT</version.org.osiam.connector4java>
-
     </properties>
 
     <repositories>
@@ -135,67 +134,15 @@
                         <executions>
                             <execution>
                                 <id>setup-osiam-webapps</id>
-                                <phase>pre-integration-test</phase>
+                                <phase>initialize</phase>
                                 <goals>
                                     <goal>copy</goal>
                                 </goals>
                             </execution>
                         </executions>
                     </plugin>
-
-                    <!-- starts the h2 database -->
-                    <plugin>
-                        <groupId>com.edugility</groupId>
-                        <artifactId>h2-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>spawn-h2</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>spawn</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <!-- starts the jetty for the OSIAM server -->
-                    <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
-                        <dependencies>
-                            <dependency>
-                                <groupId>com.h2database</groupId>
-                                <artifactId>h2</artifactId>
-                                <version>${version.com.h2database}</version>
-                            </dependency>
-                        </dependencies>
-                        <executions>
-                            <execution>
-                                <id>start-jetty</id>
-                                <phase>pre-integration-test</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <!-- creates the test data and saves them into the database -->
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>1.2.1</version>
-                        <executions>
-                            <execution>
-                                <phase>integration-test</phase>
-                                <goals>
-                                    <goal>java</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <mainClass>org.osiam.performance.tools.TestDataCreation</mainClass>
-                        </configuration>
-                    </plugin>
-
-                   <!-- creates the database seed from the created data in the database -->
+                    
+                    <!-- creates the database seed from the created data in the database -->
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>dbunit-maven-plugin</artifactId>
@@ -220,7 +167,7 @@
                         <executions>
                             <execution>
                                 <id>dump</id>
-                                <phase>integration-test</phase>
+                                <phase>generate-test-resources</phase>
                                 <goals>
                                     <goal>export</goal>
                                 </goals>
@@ -228,7 +175,29 @@
                         </executions>
                     </plugin>
 
-                    <!-- stops the jetty -->
+                    <!-- starts the h2 database -->
+                    <plugin>
+                        <groupId>com.edugility</groupId>
+                        <artifactId>h2-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>spawn-h2</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>spawn</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-h2</id>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- starts the jetty for the OSIAM server -->
                     <plugin>
                         <groupId>org.eclipse.jetty</groupId>
                         <artifactId>jetty-maven-plugin</artifactId>
@@ -241,25 +210,32 @@
                         </dependencies>
                         <executions>
                             <execution>
+                                <id>start-jetty</id>
+                                <phase>initialize</phase>
+                            </execution>
+                            <execution>
                                 <id>stop-jetty</id>
-                                <phase>post-integration-test</phase>
+                                <phase>generate-test-resources</phase>
                             </execution>
                         </executions>
                     </plugin>
 
-                    <!-- shuts down the h2 database -->
+                    <!-- creates the test data and saves them into the database -->
                     <plugin>
-                        <groupId>com.edugility</groupId>
-                        <artifactId>h2-maven-plugin</artifactId>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.2.1</version>
                         <executions>
                             <execution>
-                                <id>stop-h2</id>
-                                <phase>post-integration-test</phase>
+                                <phase>process-classes</phase>
                                 <goals>
-                                    <goal>stop</goal>
+                                    <goal>java</goal>
                                 </goals>
                             </execution>
                         </executions>
+                        <configuration>
+                            <mainClass>org.osiam.tests.performance.tools.TestDataCreation</mainClass>
+                        </configuration>
                     </plugin>
 
                 </plugins>
@@ -561,11 +537,11 @@
                                 <war>${project.build.directory}/osiam-auth-server-${version.org.osiam.server}</war>
                                 <contextPath>/osiam-auth-server</contextPath>
                             </contextHandler>
+                            <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
+                                <war>${project.build.directory}/osiam-resource-server-${version.org.osiam.server}</war>
+                                <contextPath>/osiam-resource-server</contextPath>
+                            </contextHandler>
                         </contextHandlers>
-                        <war>${project.build.directory}/osiam-resource-server-${version.org.osiam.server}</war>
-                        <webAppConfig>
-                            <contextPath>/osiam-resource-server</contextPath>
-                        </webAppConfig>
                         <jettyXml>src/main/resources/jetty.xml</jettyXml>
                     </configuration>
                     <executions>
