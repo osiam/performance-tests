@@ -1,4 +1,4 @@
-package org.osiam.performance.tools;
+package org.osiam.tests.performance.tools;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
@@ -46,8 +46,8 @@ public class TestDataCreation {
     private static OsiamConnector oConnector;
     private static AccessToken accessToken;
     
-    private static final int NUMBER_USER = 1000;
-    private static final int NUMBER_GROUPS = 50;
+    private static final int NUMBER_USER = 10;
+    private static final int NUMBER_GROUPS = 2;
     private static final String IRRELEVANT = "irrelevant";
     private static final String EXTENSION_SCHEMA = "urn:scim:extension:perfomance";
     private static final int MIN_COUNT_BYTE_BUFFER = 5000;
