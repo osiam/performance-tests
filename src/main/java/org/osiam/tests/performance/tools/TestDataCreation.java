@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
@@ -33,9 +34,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
- * class is used to create a number of test users and group in a database. 
- * Afterwards this data can be extracted as dbunit database seed 
- *
+ * class is used to create a number of test users and group in a database. Afterwards this data can be extracted as
+ * dbunit database seed
+ * 
  */
 public class TestDataCreation {
 
@@ -45,20 +46,20 @@ public class TestDataCreation {
     private static final String CLIENT_SECRET = "secret";
     private static OsiamConnector oConnector;
     private static AccessToken accessToken;
-    
+
     private static final int NUMBER_USER = 1000;
     private static final int NUMBER_GROUPS = 50;
     private static final String IRRELEVANT = "irrelevant";
     private static final String EXTENSION_SCHEMA = "urn:scim:extension:perfomance";
     private static final int MIN_COUNT_BYTE_BUFFER = 5000;
     private static ArrayList<User> users = new ArrayList<User>();
-    
+
     public static void main(String[] args) throws Exception {
         setupDb();
         setupConnector();
         createTestUserAndGroups();
     }
-    
+
     public static void setupDb() {
         try (ConfigurableApplicationContext applicationContext = new ClassPathXmlApplicationContext("context.xml")) {
             IDatabaseConnection connection = new DatabaseDataSourceConnection(
@@ -75,7 +76,7 @@ public class TestDataCreation {
             e.printStackTrace();
         }
     }
-    
+
     public static void setupConnector() throws Exception {
         OsiamConnector.Builder oConBuilder = new OsiamConnector.Builder().
                 setAuthServiceEndpoint(AUTH_ENDPOINT_ADDRESS).
@@ -92,22 +93,29 @@ public class TestDataCreation {
 
     public static void createTestUserAndGroups() {
 
-        Date start = new Date();
-        for (int count = 1; count <= NUMBER_USER; count++) {
-            User user = getNewUser(count);
-             user = oConnector.createUser(user, accessToken);
+        long start = System.nanoTime();
+        
+        for (int userIndex = 1; userIndex <= NUMBER_USER; userIndex++) {
+            User user = getNewUser(userIndex);
+            user = oConnector.createUser(user, accessToken);
+            
             users.add(user);
+            
+            System.out.println("Created User " + userIndex + "/" + NUMBER_USER);
         }
 
-        for (int count = 1; count <= NUMBER_GROUPS; count++) {
+        for (int groupIndex = 1; groupIndex <= NUMBER_GROUPS; groupIndex++) {
             Group.Builder groupBuilder = new Group.Builder();
-            groupBuilder.setDisplayName("group" + count);
-            groupBuilder.setExternalId("GrExternalId" + count);
-            groupBuilder.setMembers(getMembers(count));
+            groupBuilder.setDisplayName("group" + groupIndex);
+            groupBuilder.setExternalId("GrExternalId" + groupIndex);
+            groupBuilder.setMembers(getMembers(groupIndex));
+            
             oConnector.createGroup(groupBuilder.build(), accessToken);
+            
+            System.out.println("Created Group " + groupIndex + "/" + NUMBER_GROUPS);
         }
-        Date end = new Date();
-        long time = (end.getTime() - start.getTime()) / 1000;
+        
+        long time = TimeUnit.SECONDS.convert(System.nanoTime() - start, TimeUnit.NANOSECONDS);
         System.out.println(time + " seconds needed to create the users and groups");
     }
 
