@@ -163,6 +163,8 @@
                             <format>flat</format>
                             <ordered>true</ordered>
                             <dest>src/main/resources/database_seed.xml</dest>
+                            <src>src/main/resources/database_seed.xml</src>
+                            <type>CLEAN_INSERT</type>
                         </configuration>
                         <executions>
                             <execution>
@@ -578,7 +580,7 @@
                                 <propertiesJMeter>
                                     <jmeter.exit.check.pause>10000</jmeter.exit.check.pause>
                                 </propertiesJMeter>
-                                <testResultsTimestamp>false</testResultsTimestamp>
+                                <suppressJMeterOutput>false</suppressJMeterOutput>
                             </configuration>
                         </execution>
                     </executions>
@@ -636,22 +638,36 @@
             </plugin>
 
             <plugin>
-                <groupId>com.lazerycode.jmeter</groupId>
-                <artifactId>jmeter-analysis-maven-plugin</artifactId>
-                <version>1.0.4</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>xml-maven-plugin</artifactId>
+                <version>1.0</version>
                 <executions>
                     <execution>
-                        <id>jmeter-results-analysis</id>
-                        <!-- <phase>verify</phase> <goals> <goal>analyze</goal> </goals> -->
-                        <configuration>
-                            <source>${project.build.directory}/jmeter/results/*.jtl</source>
-                            <targetDirectory>${project.build.directory}/jmeter-reports</targetDirectory>
-                            <generateCSVs>true</generateCSVs>
-                            <generateCharts>true</generateCharts>
-                        </configuration>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>transform</goal>
+                        </goals>
                     </execution>
                 </executions>
-
+                <configuration>
+                    <transformationSets>
+                        <transformationSet>
+                            <dir>${project.build.directory}/jmeter/results</dir>
+                            <stylesheet>${project.basedir}/src/main/resources/jmeter-results-report_21.xsl</stylesheet>
+                            <outputDir>${project.build.directory}/jmeter-reports</outputDir>
+                            <fileMappers>
+                                <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.RegExpFileMapper">
+                                    <pattern>(.*?)\s(.*?)</pattern>
+                                    <replacement>$1$2</replacement>
+                                    <replaceAll>true</replaceAll>
+                                </fileMapper>
+                                <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
+                                    <targetExtension>.html</targetExtension>
+                                </fileMapper>
+                            </fileMappers>
+                        </transformationSet>
+                    </transformationSets>
+                </configuration>
             </plugin>
 
             <plugin>
