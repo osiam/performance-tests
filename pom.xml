@@ -109,6 +109,57 @@
 
     <profiles>
 
+        <!-- Running tests in IDE -->
+        <profile>
+            <id>ide</id>
+            <properties>
+                <osiam.properties.file>osiam_h2.properties</osiam.properties.file>
+            </properties>
+
+            <dependencies>
+                <dependency>
+                    <groupId>com.h2database</groupId>
+                    <artifactId>h2</artifactId>
+                    <version>${version.com.h2database}</version>
+                </dependency>
+            </dependencies>
+
+            <build>
+                <plugins>
+
+                    <plugin>
+                        <groupId>com.github.goldin</groupId>
+                        <artifactId>copy-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>setup-osiam-webapps</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.h2database</groupId>
+                                <artifactId>h2</artifactId>
+                                <version>${version.com.h2database}</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <scanIntervalSeconds>0</scanIntervalSeconds>
+                        </configuration>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+    
         <!-- tools-generate-test-data -->
         <profile>
             <id>tools-generate-test-data</id>
