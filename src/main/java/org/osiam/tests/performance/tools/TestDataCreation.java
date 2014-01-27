@@ -21,15 +21,17 @@ import org.osiam.client.oauth.GrantType;
 import org.osiam.client.oauth.Scope;
 import org.osiam.resources.scim.Address;
 import org.osiam.resources.scim.Email;
+import org.osiam.resources.scim.Entitlement;
 import org.osiam.resources.scim.Extension;
 import org.osiam.resources.scim.Group;
 import org.osiam.resources.scim.Im;
 import org.osiam.resources.scim.MemberRef;
-import org.osiam.resources.scim.MultiValuedAttribute;
 import org.osiam.resources.scim.Name;
 import org.osiam.resources.scim.PhoneNumber;
 import org.osiam.resources.scim.Photo;
+import org.osiam.resources.scim.Role;
 import org.osiam.resources.scim.User;
+import org.osiam.resources.scim.X509Certificate;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -94,27 +96,26 @@ public class TestDataCreation {
     public static void createTestUserAndGroups() {
 
         long start = System.nanoTime();
-        
+
         for (int userIndex = 1; userIndex <= NUMBER_USER; userIndex++) {
             User user = getNewUser(userIndex);
             user = oConnector.createUser(user, accessToken);
-            
+
             users.add(user);
-            
+
             System.out.println("Created User " + userIndex + "/" + NUMBER_USER);
         }
 
         for (int groupIndex = 1; groupIndex <= NUMBER_GROUPS; groupIndex++) {
-            Group.Builder groupBuilder = new Group.Builder();
-            groupBuilder.setDisplayName("group" + groupIndex);
+            Group.Builder groupBuilder = new Group.Builder("group" + groupIndex);
             groupBuilder.setExternalId("GrExternalId" + groupIndex);
             groupBuilder.setMembers(getMembers(groupIndex));
-            
+
             oConnector.createGroup(groupBuilder.build(), accessToken);
-            
+
             System.out.println("Created Group " + groupIndex + "/" + NUMBER_GROUPS);
         }
-        
+
         long time = TimeUnit.SECONDS.convert(System.nanoTime() - start, TimeUnit.NANOSECONDS);
         System.out.println(time + " seconds needed to create the users and groups");
     }
@@ -176,14 +177,14 @@ public class TestDataCreation {
     private static ArrayList<Address> getAddresses(int countCurrentUser) {
 
         ArrayList<Address> addresses = new ArrayList<Address>();
-        addresses.add(getNewAddress(countCurrentUser, true, Address.Type.WORK.getValue()));
-        addresses.add(getNewAddress(countCurrentUser, false, Address.Type.HOME.getValue()));
-        addresses.add(getNewAddress(countCurrentUser, false, Address.Type.OTHER.getValue()));
+        addresses.add(getNewAddress(countCurrentUser, true, Address.Type.WORK));
+        addresses.add(getNewAddress(countCurrentUser, false, Address.Type.HOME));
+        addresses.add(getNewAddress(countCurrentUser, false, Address.Type.OTHER));
 
         return addresses;
     }
 
-    private static Address getNewAddress(int countCurrentUser, boolean primary, String type) {
+    private static Address getNewAddress(int countCurrentUser, boolean primary, Address.Type type) {
         return new Address.Builder().setCountry("de")
                 .setFormatted("Address of user number " + countCurrentUser)
                 .setLocality("de")
@@ -195,110 +196,110 @@ public class TestDataCreation {
                 .build();
     }
 
-    private static ArrayList<MultiValuedAttribute> getEmailaddress(int countCurrentUser) {
+    private static ArrayList<Email> getEmailaddress(int countCurrentUser) {
 
-        ArrayList<MultiValuedAttribute> emails = new ArrayList<MultiValuedAttribute>();
-        emails.add(getNewEmail(countCurrentUser, true, Email.Type.WORK.getValue()));
-        emails.add(getNewEmail(countCurrentUser, false, Email.Type.HOME.getValue()));
-        emails.add(getNewEmail(countCurrentUser, false, Email.Type.OTHER.getValue()));
+        ArrayList<Email> emails = new ArrayList<Email>();
+        emails.add(getNewEmail(countCurrentUser, true, Email.Type.WORK));
+        emails.add(getNewEmail(countCurrentUser, false, Email.Type.HOME));
+        emails.add(getNewEmail(countCurrentUser, false, Email.Type.OTHER));
 
         return emails;
     }
 
-    private static MultiValuedAttribute getNewEmail(int countCurrentUser, boolean primary, String type) {
-        return new MultiValuedAttribute.Builder()
+    private static Email getNewEmail(int countCurrentUser, boolean primary, Email.Type type) {
+        return new Email.Builder()
                 .setPrimary(primary)
                 .setType(type)
-                .setValue("email" + countCurrentUser + "@" + type + ".com")
+                .setValue("email" + countCurrentUser + "@" + type.getValue() + ".com")
                 .build();
     }
 
-    private static ArrayList<MultiValuedAttribute> getEntitlements(int countCurrentUser) {
+    private static ArrayList<Entitlement> getEntitlements(int countCurrentUser) {
 
-        MultiValuedAttribute entitlement = new MultiValuedAttribute.Builder()
+        Entitlement entitlement = new Entitlement.Builder()
                 .setPrimary(true)
-                .setType(IRRELEVANT)
+                .setType(new Entitlement.Type(IRRELEVANT))
                 .setValue("entitlement" + countCurrentUser)
                 .build();
 
-        ArrayList<MultiValuedAttribute> entitlements = new ArrayList<MultiValuedAttribute>();
+        ArrayList<Entitlement> entitlements = new ArrayList<Entitlement>();
         entitlements.add(entitlement);
 
         return entitlements;
     }
 
-    private static ArrayList<MultiValuedAttribute> getIms(int countCurrentUser) {
+    private static ArrayList<Im> getIms(int countCurrentUser) {
 
-        ArrayList<MultiValuedAttribute> ims = new ArrayList<MultiValuedAttribute>();
-        ims.add(getNewIm(countCurrentUser, true, Im.Type.AIM.getValue()));
-        ims.add(getNewIm(countCurrentUser, false, Im.Type.GTALK.getValue()));
-        ims.add(getNewIm(countCurrentUser, false, Im.Type.ICQ.getValue()));
-        ims.add(getNewIm(countCurrentUser, false, Im.Type.MSN.getValue()));
-        ims.add(getNewIm(countCurrentUser, false, Im.Type.QQ.getValue()));
-        ims.add(getNewIm(countCurrentUser, false, Im.Type.XMPP.getValue()));
+        ArrayList<Im> ims = new ArrayList<Im>();
+        ims.add(getNewIm(countCurrentUser, true, Im.Type.AIM));
+        ims.add(getNewIm(countCurrentUser, false, Im.Type.GTALK));
+        ims.add(getNewIm(countCurrentUser, false, Im.Type.ICQ));
+        ims.add(getNewIm(countCurrentUser, false, Im.Type.MSN));
+        ims.add(getNewIm(countCurrentUser, false, Im.Type.QQ));
+        ims.add(getNewIm(countCurrentUser, false, Im.Type.XMPP));
 
         return ims;
     }
 
-    private static MultiValuedAttribute getNewIm(int countCurrentUser, boolean primary, String type) {
-        return new MultiValuedAttribute.Builder()
+    private static Im getNewIm(int countCurrentUser, boolean primary, Im.Type type) {
+        return new Im.Builder()
                 .setPrimary(primary)
                 .setType(type)
                 .setValue("im-" + countCurrentUser)
                 .build();
     }
 
-    private static ArrayList<MultiValuedAttribute> getPhoneNumbers(int countCurrentUser) {
+    private static ArrayList<PhoneNumber> getPhoneNumbers(int countCurrentUser) {
 
-        ArrayList<MultiValuedAttribute> phoneNumbers = new ArrayList<MultiValuedAttribute>();
-        phoneNumbers.add(getNewPhoneNumber(countCurrentUser, true, PhoneNumber.Type.WORK.getValue()));
-        phoneNumbers.add(getNewPhoneNumber(countCurrentUser, false, PhoneNumber.Type.HOME.getValue()));
-        phoneNumbers.add(getNewPhoneNumber(countCurrentUser, false, PhoneNumber.Type.OTHER.getValue()));
+        ArrayList<PhoneNumber> phoneNumbers = new ArrayList<PhoneNumber>();
+        phoneNumbers.add(getNewPhoneNumber(countCurrentUser, true, PhoneNumber.Type.WORK));
+        phoneNumbers.add(getNewPhoneNumber(countCurrentUser, false, PhoneNumber.Type.HOME));
+        phoneNumbers.add(getNewPhoneNumber(countCurrentUser, false, PhoneNumber.Type.OTHER));
 
         return phoneNumbers;
     }
 
-    private static MultiValuedAttribute getNewPhoneNumber(int countCurrentUser, boolean primary, String type) {
-        return new MultiValuedAttribute.Builder()
+    private static PhoneNumber getNewPhoneNumber(int countCurrentUser, boolean primary, PhoneNumber.Type type) {
+        return new PhoneNumber.Builder()
                 .setPrimary(primary)
                 .setType(type)
                 .setValue("049123" + countCurrentUser)
                 .build();
     }
 
-    private static ArrayList<MultiValuedAttribute> getPhotos(int countCurrentUser) {
+    private static ArrayList<Photo> getPhotos(int countCurrentUser) {
 
-        ArrayList<MultiValuedAttribute> photos = new ArrayList<MultiValuedAttribute>();
-        photos.add(getNewPhoto(countCurrentUser, true, Photo.Type.PHOTO.getValue()));
-        photos.add(getNewPhoto(countCurrentUser, false, Photo.Type.THUMBNAIL.getValue()));
+        ArrayList<Photo> photos = new ArrayList<Photo>();
+        photos.add(getNewPhoto(countCurrentUser, true, Photo.Type.PHOTO));
+        photos.add(getNewPhoto(countCurrentUser, false, Photo.Type.THUMBNAIL));
 
         return photos;
     }
 
-    private static MultiValuedAttribute getNewPhoto(int countCurrentUser, boolean primary, String type) {
-        return new MultiValuedAttribute.Builder()
+    private static Photo getNewPhoto(int countCurrentUser, boolean primary, Photo.Type type) {
+        return new Photo.Builder()
                 .setPrimary(primary)
                 .setType(type)
                 .setValue("photo-url-" + countCurrentUser + ".jpg")
                 .build();
     }
 
-    private static ArrayList<MultiValuedAttribute> getRoles(int countCurrentUser) {
+    private static ArrayList<Role> getRoles(int countCurrentUser) {
 
-        MultiValuedAttribute role = new MultiValuedAttribute.Builder()
+        Role role = new Role.Builder()
                 .setPrimary(true)
                 .setValue("role" + countCurrentUser)
                 .build();
 
-        ArrayList<MultiValuedAttribute> roles = new ArrayList<MultiValuedAttribute>();
+        ArrayList<Role> roles = new ArrayList<Role>();
         roles.add(role);
 
         return roles;
     }
 
-    private static ArrayList<MultiValuedAttribute> getX509Certificates() {
+    private static ArrayList<X509Certificate> getX509Certificates() {
 
-        MultiValuedAttribute role = new MultiValuedAttribute.Builder()
+        X509Certificate x509Certificate = new X509Certificate.Builder()
                 .setPrimary(true)
                 .setValue("MIIBrTCCARagAwIBAgIFHL6O8kAwDQYJKoZIhvcNAQEFBQAwGDEWMBQGA1UEAxMNRXhhbXBsZUlz"
                         + "c3VlcjAiGA8yMDAwMDEwMTAwMDAwMFoYDzIwNTAwMTAxMDAwMDAwWjAZMRcwFQYDVQQDEw5FeGFt"
@@ -310,10 +311,10 @@ public class TestDataCreation {
                         + "aVjjgqxSubteb6th+cqTsPdUsn5WfDbDjeuSa5d0fOEBzw==")
                 .build();
 
-        ArrayList<MultiValuedAttribute> roles = new ArrayList<MultiValuedAttribute>();
-        roles.add(role);
+        ArrayList<X509Certificate> x509Certificates = new ArrayList<X509Certificate>();
+        x509Certificates.add(x509Certificate);
 
-        return roles;
+        return x509Certificates;
     }
 
     private static Extension getExtension(int countCurrentUser) {
