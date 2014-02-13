@@ -40,8 +40,8 @@
         <version.postgresql>9.1-901.jdbc4</version.postgresql>
 
         <!-- OSIAM -->
-        <version.org.osiam.server>0.16-SNAPSHOT</version.org.osiam.server>
-        <version.org.osiam.connector4java>0.12-SNAPSHOT</version.org.osiam.connector4java>
+        <version.org.osiam.server>0.17-SNAPSHOT</version.org.osiam.server>
+        <version.org.osiam.connector4java>0.13-SNAPSHOT</version.org.osiam.connector4java>
     </properties>
 
     <repositories>
