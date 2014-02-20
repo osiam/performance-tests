@@ -32,10 +32,10 @@ public class RetrieveListOfUsersWithComplexQuery extends AbstractPerformanceTest
 
     @Test
     public void run() throws UnsupportedEncodingException {
-        String queryString = "filter=meta.created gt \"2011-10-10 00:00:00\""
+        String queryString = "filter=" + URLEncoder.encode("meta.created gt \"2011-10-10T00:00:00.000\""
                 + " and (userName co \"er3\" or userName co \"4\")"
-                + " and (email sw \"email3\" and email.type eq \"work\")";
+                + " and (emails sw \"email3\" and emails.type eq \"work\")", "UTF-8");
 
-        osiamConnector.searchUsers(URLEncoder.encode(queryString, "UTF-8"), accessToken);
+        osiamConnector.searchUsers(queryString, accessToken);
     }
 }
