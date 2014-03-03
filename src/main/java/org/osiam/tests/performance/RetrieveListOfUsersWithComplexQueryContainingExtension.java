@@ -35,8 +35,8 @@ public class RetrieveListOfUsersWithComplexQueryContainingExtension extends Abst
         String queryString = "filter=" + URLEncoder.encode("meta.created gt \"2011-10-10T00:00:00.000\""
                 + " and (userName co \"er3\" or userName co \"4\")"
                 + " and (emails sw \"email3\" and emails.type eq \"work\")"
-                + " and urn:scim:extension:perfomance.stringValue sw \"Hello\""
-                + " and urn:scim:extension:perfomance.integerValue gt 100", "UTF-8");
+                + " and urn:scim:extension:performance.stringValue sw \"Hello\""
+                + " and urn:scim:extension:performance.integerValue gt 100", "UTF-8");
 
         osiamConnector.searchUsers(queryString, accessToken);
     }

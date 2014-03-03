@@ -75,7 +75,7 @@ public class TestDataCreation {
     private static final int NUMBER_USER = 1000;
     private static final int NUMBER_GROUPS = 50;
     private static final String IRRELEVANT = "irrelevant";
-    private static final String EXTENSION_SCHEMA = "urn:scim:extension:perfomance";
+    private static final String EXTENSION_SCHEMA = "urn:scim:extension:performance";
     private static final int MIN_COUNT_BYTE_BUFFER = 5000;
     private static ArrayList<User> users = new ArrayList<User>();
 

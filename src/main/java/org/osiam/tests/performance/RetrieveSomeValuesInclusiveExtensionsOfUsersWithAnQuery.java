@@ -42,7 +42,7 @@ public class RetrieveSomeValuesInclusiveExtensionsOfUsersWithAnQuery extends Abs
                 + " and (userName co \"er3\" or userName co \"4\")"
                 + " and (emails sw \"email3\" and emails.type eq \"work\")", "UTF-8")
                 + "&attributes="
-                + URLEncoder.encode("userName, displayName, emails, urn:scim:extension:perfomance", "UTF-8");
+                + URLEncoder.encode("userName, displayName, emails, urn:scim:extension:performance", "UTF-8");
         List<User> users = osiamConnector.searchUsers(queryString, accessToken).getResources();
         assertThat(users.size(), greaterThan(50));
         assertThat(users.size(), lessThan(150));
