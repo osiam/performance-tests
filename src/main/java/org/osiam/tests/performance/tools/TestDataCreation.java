@@ -24,6 +24,8 @@
 package org.osiam.tests.performance.tools;
 
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Date;
@@ -300,11 +302,16 @@ public class TestDataCreation {
     }
 
     private static Photo getNewPhoto(int countCurrentUser, boolean primary, Photo.Type type) {
-        return new Photo.Builder()
-                .setPrimary(primary)
-                .setType(type)
-                .setValue("photo-url-" + countCurrentUser + ".jpg")
-                .build();
+        Photo photo = null;
+        try {
+            photo = new Photo.Builder()
+                    .setPrimary(primary)
+                    .setType(type)
+                    .setValue(new URI("photo-url-" + countCurrentUser + ".jpg"))
+                    .build();
+        } catch (URISyntaxException e) {
+        }
+        return photo;
     }
 
     private static ArrayList<Role> getRoles(int countCurrentUser) {
