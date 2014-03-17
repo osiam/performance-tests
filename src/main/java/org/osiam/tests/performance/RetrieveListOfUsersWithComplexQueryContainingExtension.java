@@ -36,7 +36,7 @@ public class RetrieveListOfUsersWithComplexQueryContainingExtension extends Abst
                 + " and (userName co \"er3\" or userName co \"4\")"
                 + " and (emails sw \"email3\" and emails.type eq \"work\")"
                 + " and urn:scim:extension:performance.stringValue sw \"Hello\""
-                + " and urn:scim:extension:performance.integerValue gt 100", "UTF-8");
+                + " and urn:scim:extension:performance.integerValue gt \"100\"", "UTF-8");
 
         osiamConnector.searchUsers(queryString, accessToken);
     }
