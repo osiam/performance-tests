@@ -106,8 +106,8 @@ public class TestDataCreation {
 
     public static void setupConnector() throws Exception {
         OsiamConnector.Builder oConBuilder = new OsiamConnector.Builder().
-                setAuthServiceEndpoint(AUTH_ENDPOINT_ADDRESS).
-                setResourceEndpoint(RESOURCE_ENDPOINT_ADDRESS).
+                setAuthServerEndpoint(AUTH_ENDPOINT_ADDRESS).
+                setResourceServerEndpoint(RESOURCE_ENDPOINT_ADDRESS).
                 setClientId(CLIENT_ID).
                 setClientSecret(CLIENT_SECRET).
                 setGrantType(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS).
@@ -349,14 +349,15 @@ public class TestDataCreation {
 
     private static Extension getExtension(int countCurrentUser) {
 
-        Extension extension = new Extension(EXTENSION_SCHEMA);
-        extension.addOrUpdateField("stringValue", "Hello " + countCurrentUser);
-        extension.addOrUpdateField("integerValue", Integer.toString(countCurrentUser));
-        extension.addOrUpdateField("booleanValue", countCurrentUser % 2 == 0);
-        extension.addOrUpdateField("decimalValue", new BigDecimal(countCurrentUser));
-        extension.addOrUpdateField("dateValue", new Date());
-        extension.addOrUpdateField("binaryValue", getBigByteBuffer(countCurrentUser));
-        extension.addOrUpdateField("referenceValue", "https://example.com/Users/" + (countCurrentUser - 1));
+        Extension extension = new Extension.Builder(EXTENSION_SCHEMA)
+        .setField("stringValue", "Hello " + countCurrentUser)
+        .setField("integerValue", Integer.toString(countCurrentUser))
+        .setField("booleanValue", countCurrentUser % 2 == 0)
+        .setField("decimalValue", new BigDecimal(countCurrentUser))
+        .setField("dateValue", new Date())
+        .setField("binaryValue", getBigByteBuffer(countCurrentUser))
+        .setField("referenceValue", "https://example.com/Users/" + (countCurrentUser - 1))
+        .build();
         return extension;
     }
 
