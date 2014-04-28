@@ -113,7 +113,9 @@
         <profile>
             <id>ide-h2</id>
             <properties>
-                <osiam.properties.file>osiam_h2.properties</osiam.properties.file>
+                <osiam.auth-server.properties.file>auth-server_h2.properties</osiam.auth-server.properties.file>
+                <osiam.resource-server.properties.file>resource-server_h2.properties</osiam.resource-server.properties.file>
+                <osiam.performance-tests.properties.file>performance-tests_h2.properties</osiam.performance-tests.properties.file>
             </properties>
 
             <dependencies>
@@ -163,9 +165,11 @@
         <!-- Running tests in IDE with postgresql -->
         <profile>
             <id>ide-pg</id>
-            
+
             <properties>
-                <osiam.properties.file>osiam_pg.properties</osiam.properties.file>
+                <osiam.auth-server.properties.file>auth-server_pg.properties</osiam.auth-server.properties.file>
+                <osiam.resource-server.properties.file>resource-server_pg.properties</osiam.resource-server.properties.file>
+                <osiam.performance-tests.properties.file>performance-tests_pg.properties</osiam.performance-tests.properties.file>
             </properties>
 
             <dependencies>
@@ -217,7 +221,9 @@
             <id>tools-generate-test-data</id>
 
             <properties>
-                <osiam.properties.file>osiam_h2.properties</osiam.properties.file>
+                <osiam.auth-server.properties.file>auth-server_h2.properties</osiam.auth-server.properties.file>
+                <osiam.resource-server.properties.file>resource-server_h2.properties</osiam.resource-server.properties.file>
+                <osiam.performance-tests.properties.file>performance-tests_h2.properties</osiam.performance-tests.properties.file>
             </properties>
 
             <dependencies>
@@ -356,7 +362,9 @@
             </activation>
 
             <properties>
-                <osiam.properties.file>osiam_h2.properties</osiam.properties.file>
+                <osiam.auth-server.properties.file>auth-server_h2.properties</osiam.auth-server.properties.file>
+                <osiam.resource-server.properties.file>resource-server_h2.properties</osiam.resource-server.properties.file>
+                <osiam.performance-tests.properties.file>performance-tests_h2.properties</osiam.performance-tests.properties.file>
             </properties>
 
             <dependencies>
@@ -446,7 +454,9 @@
             <id>local-postgres</id>
 
             <properties>
-                <osiam.properties.file>osiam_pg.properties</osiam.properties.file>
+                <osiam.auth-server.properties.file>auth-server_pg.properties</osiam.auth-server.properties.file>
+                <osiam.resource-server.properties.file>resource-server_pg.properties</osiam.resource-server.properties.file>
+                <osiam.performance-tests.properties.file>performance-tests_pg.properties</osiam.performance-tests.properties.file>
             </properties>
 
             <dependencies>
@@ -552,13 +562,13 @@
                             </configuration>
                         </execution>
                         <execution>
-                            <id>copy-osiam-properties</id>
+                            <id>setup-performance-test</id>
                             <configuration>
                                 <resources>
                                     <resource>
                                         <targetPath>${project.build.directory}/classes</targetPath>
-                                        <file>${project.basedir}/src/main/resources/${osiam.properties.file}</file>
-                                        <destFileName>osiam.properties</destFileName>
+                                        <file>${project.basedir}/src/main/resources/${osiam.performance-tests.properties.file}</file>
+                                        <destFileName>performance-tests.properties</destFileName>
                                     </resource>
                                 </resources>
                             </configuration>
@@ -583,13 +593,13 @@
                                     <!-- Resource Server: Copy DB Config -->
                                     <resource>
                                         <targetPath>${project.build.directory}/osiam-resource-server-${version.org.osiam.server}/WEB-INF</targetPath>
-                                        <file>${project.basedir}/src/main/resources/jpa-configuration.xml</file>
+                                        <file>${project.basedir}/src/main/resources/resource-server-configuration/jpa-configuration.xml</file>
                                     </resource>
-                                    <!-- Resource Server: Copy osiam.properties -->
+                                    <!-- Resource Server: Copy .properties -->
                                     <resource>
                                         <targetPath>${project.build.directory}/osiam-resource-server-${version.org.osiam.server}/WEB-INF/classes</targetPath>
-                                        <file>${project.basedir}/src/main/resources/${osiam.properties.file}</file>
-                                        <destFileName>osiam.properties</destFileName>
+                                        <file>${project.basedir}/src/main/resources/resource-server-configuration/${osiam.resource-server.properties.file}</file>
+                                        <destFileName>resource-server.properties</destFileName>
                                     </resource>
                                     <!-- Unpack OSIAM Auth Server -->
                                     <resource>
@@ -604,11 +614,22 @@
                                         </dependencies>
                                         <unpack>true</unpack>
                                     </resource>
-                                    <!-- Auth Server: Copy osiam.properties -->
+                                    <!-- Auth Server: Copy DB Config -->
+                                    <resource>
+                                        <targetPath>${project.build.directory}/osiam-auth-server-${version.org.osiam.server}/WEB-INF</targetPath>
+                                        <file>${project.basedir}/src/main/resources/auth-server-configuration/jpa-configuration.xml</file>
+                                    </resource>
+                                    <!-- Auth Server: Copy .properties -->
                                     <resource>
                                         <targetPath>${project.build.directory}/osiam-auth-server-${version.org.osiam.server}/WEB-INF/classes</targetPath>
-                                        <file>${project.basedir}/src/main/resources/${osiam.properties.file}</file>
-                                        <destFileName>osiam.properties</destFileName>
+                                        <file>${project.basedir}/src/main/resources/auth-server-configuration/${osiam.auth-server.properties.file}</file>
+                                        <destFileName>auth-server.properties</destFileName>
+                                    </resource>
+                                    <!-- Auth Server: Copy the rest -->
+                                    <resource>
+                                        <targetPath>${project.build.directory}/osiam-auth-server-${version.org.osiam.server}/WEB-INF/classes/auth-server</targetPath>
+                                        <directory>${project.basedir}/src/main/resources/auth-server-configuration/auth-server</directory>
+                                        <preservePath>true</preservePath>
                                     </resource>
                                 </resources>
                             </configuration>
@@ -716,7 +737,7 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>copy-osiam-properties</id>
+                        <id>setup-performance-test</id>
                         <phase>process-resources</phase>
                         <goals>
                             <goal>copy</goal>
