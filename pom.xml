@@ -694,6 +694,18 @@
                     <groupId>com.lazerycode.jmeter</groupId>
                     <artifactId>jmeter-maven-plugin</artifactId>
                     <version>1.9.0</version>
+                    <dependencies>
+                        <!--
+                            needed to override httpclient dependency from jmeter.
+                            try to keep version in sync with connector4java's
+                            as close as possible.
+                        -->
+                        <dependency>
+                            <groupId>org.apache.httpcomponents</groupId>
+                            <artifactId>httpclient</artifactId>
+                            <version>4.3.3</version>
+                        </dependency>
+                    </dependencies>
                     <executions>
                         <execution>
                             <id>jmeter-tests</id>
