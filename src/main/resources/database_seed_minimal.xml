@@ -55,7 +55,7 @@
 		value="USER" />
 
 	<scim_extension internal_id="100081"
-		urn="urn:scim:extension:perfomance" />
+		urn="urn:scim:extension:performance" />
 
 	<scim_extension_field internal_id="100082"
 		is_required="true" name="stringValue" type="STRING"
