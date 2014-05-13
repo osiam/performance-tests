@@ -166,24 +166,24 @@ public class TestDataCreation {
         User.Builder userBuilder = new User.Builder("user" + userCount);
 
         userBuilder.setActive(userCount % 2 == 0);
-        userBuilder.setAddresses(getAddresses(userCount));
+        userBuilder.addAddresses(getAddresses(userCount));
         userBuilder.setDisplayName("displayName" + userCount);
-        userBuilder.setEmails(getEmailaddress(userCount));
-        userBuilder.setEntitlements(getEntitlements(userCount));
+        userBuilder.addEmails(getEmailaddress(userCount));
+        userBuilder.addEntitlements(getEntitlements(userCount));
         userBuilder.setExternalId("externalId" + userCount);
-        userBuilder.setIms(getIms(userCount));
+        userBuilder.addIms(getIms(userCount));
         userBuilder.setLocale("de");
         userBuilder.setName(getName(userCount));
         userBuilder.setNickName("nickName" + userCount);
         userBuilder.setPassword("password" + userCount);
-        userBuilder.setPhoneNumbers(getPhoneNumbers(userCount));
-        userBuilder.setPhotos(getPhotos(userCount));
+        userBuilder.addPhoneNumbers(getPhoneNumbers(userCount));
+        userBuilder.addPhotos(getPhotos(userCount));
         userBuilder.setPreferredLanguage("de");
         userBuilder.setProfileUrl("www.my-url" + userCount + ".com");
-        userBuilder.setRoles(getRoles(userCount));
+        userBuilder.addRoles(getRoles(userCount));
         userBuilder.setTimezone("de");
         userBuilder.setTitle("title" + userCount);
-        userBuilder.setX509Certificates(getX509Certificates());
+        userBuilder.addX509Certificates(getX509Certificates());
         userBuilder.addExtension(getExtension(userCount));
 
         return userBuilder.build();
