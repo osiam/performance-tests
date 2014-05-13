@@ -22,7 +22,7 @@
  */
 package org.osiam.tests.performance;
 
-import org.osiam.client.connector.OsiamConnector;
+import org.osiam.client.OsiamConnector;
 import org.osiam.client.oauth.AccessToken;
 
 public abstract class AbstractPerformanceTest extends PerformanceTestContext {

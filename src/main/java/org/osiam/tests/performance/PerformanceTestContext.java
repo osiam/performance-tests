@@ -33,7 +33,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.osiam.client.connector.OsiamConnector;
+import org.osiam.client.OsiamConnector;
 import org.osiam.client.oauth.AccessToken;
 import org.osiam.client.oauth.GrantType;
 import org.osiam.client.oauth.Scope;
@@ -75,15 +75,11 @@ public class PerformanceTestContext {
                 setAuthServerEndpoint(AUTH_ENDPOINT_ADDRESS).
                 setResourceServerEndpoint(RESOURCE_ENDPOINT_ADDRESS).
                 setClientId(CLIENT_ID).
-                setClientSecret(CLIENT_SECRET).
-                setGrantType(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS).
-                setUserName("marissa").
-                setPassword("koala").
-                setScope(Scope.ALL);
+                setClientSecret(CLIENT_SECRET);
         osiamConnector = oConBuilder.build();
 
         System.out.println("Retrieving access token");
-        accessToken = osiamConnector.retrieveAccessToken();
+        accessToken = osiamConnector.retrieveAccessToken("marissa", "koala", Scope.ALL);
     }
 
     @AfterClass

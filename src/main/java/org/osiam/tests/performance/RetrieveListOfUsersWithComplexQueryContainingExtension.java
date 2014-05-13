@@ -24,20 +24,21 @@
 package org.osiam.tests.performance;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 import org.junit.Test;
+import org.osiam.client.query.Query;
+import org.osiam.client.query.QueryBuilder;
 
 public class RetrieveListOfUsersWithComplexQueryContainingExtension extends AbstractPerformanceTest {
 
     @Test
     public void run() throws UnsupportedEncodingException {
-        String queryString = "filter=" + URLEncoder.encode("meta.created gt \"2011-10-10T00:00:00.000\""
+        Query query = new QueryBuilder().filter("meta.created gt \"2011-10-10T00:00:00.000\""
                 + " and (userName co \"er3\" or userName co \"4\")"
                 + " and (emails sw \"email3\" and emails.type eq \"work\")"
                 + " and urn:scim:extension:performance.stringValue sw \"Hello\""
-                + " and urn:scim:extension:performance.integerValue gt \"100\"", "UTF-8");
+                + " and urn:scim:extension:performance.integerValue gt \"100\"").build();
 
-        osiamConnector.searchUsers(queryString, accessToken);
+        osiamConnector.searchUsers(query, accessToken);
     }
 }

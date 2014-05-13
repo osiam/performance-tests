@@ -40,7 +40,7 @@ import org.dbunit.database.DatabaseDataSourceConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
-import org.osiam.client.connector.OsiamConnector;
+import org.osiam.client.OsiamConnector;
 import org.osiam.client.oauth.AccessToken;
 import org.osiam.client.oauth.GrantType;
 import org.osiam.client.oauth.Scope;
@@ -109,13 +109,9 @@ public class TestDataCreation {
                 setAuthServerEndpoint(AUTH_ENDPOINT_ADDRESS).
                 setResourceServerEndpoint(RESOURCE_ENDPOINT_ADDRESS).
                 setClientId(CLIENT_ID).
-                setClientSecret(CLIENT_SECRET).
-                setGrantType(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS).
-                setUserName("marissa").
-                setPassword("koala").
-                setScope(Scope.ALL);
+                setClientSecret(CLIENT_SECRET);
         oConnector = oConBuilder.build();
-        accessToken = oConnector.retrieveAccessToken();
+        accessToken = oConnector.retrieveAccessToken("marissa", "koala", Scope.ALL);
     }
 
     public static void createTestUserAndGroups() {
