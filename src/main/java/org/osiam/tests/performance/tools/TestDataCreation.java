@@ -42,7 +42,6 @@ import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 import org.osiam.client.OsiamConnector;
 import org.osiam.client.oauth.AccessToken;
-import org.osiam.client.oauth.GrantType;
 import org.osiam.client.oauth.Scope;
 import org.osiam.resources.scim.Address;
 import org.osiam.resources.scim.Email;
@@ -346,14 +345,14 @@ public class TestDataCreation {
     private static Extension getExtension(int countCurrentUser) {
 
         Extension extension = new Extension.Builder(EXTENSION_SCHEMA)
-        .setField("stringValue", "Hello " + countCurrentUser)
-        .setField("integerValue", Integer.toString(countCurrentUser))
-        .setField("booleanValue", countCurrentUser % 2 == 0)
-        .setField("decimalValue", new BigDecimal(countCurrentUser))
-        .setField("dateValue", new Date())
-        .setField("binaryValue", getBigByteBuffer(countCurrentUser))
-        .setField("referenceValue", "https://example.com/Users/" + (countCurrentUser - 1))
-        .build();
+                .setField("stringValue", "Hello " + countCurrentUser)
+                .setField("integerValue", Integer.toString(countCurrentUser))
+                .setField("booleanValue", countCurrentUser % 2 == 0)
+                .setField("decimalValue", new BigDecimal(countCurrentUser))
+                .setField("dateValue", new Date())
+                .setField("binaryValue", getBigByteBuffer(countCurrentUser))
+                .setField("referenceValue", "https://example.com/Users/" + (countCurrentUser - 1))
+                .build();
         return extension;
     }
 

@@ -35,7 +35,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.osiam.client.OsiamConnector;
 import org.osiam.client.oauth.AccessToken;
-import org.osiam.client.oauth.GrantType;
 import org.osiam.client.oauth.Scope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -43,12 +42,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class PerformanceTestContext {
     public static final String VALID_USER_ID = "be108952-0667-42a9-864e-3e1012f1234a";
     public static final String VALID_GROUP_ID = "0c24ab45-ae2a-43fe-8e9b-37581175c87c";
-    
+
     private static final String AUTH_ENDPOINT_ADDRESS = "http://localhost:8180/osiam-auth-server";
     private static final String RESOURCE_ENDPOINT_ADDRESS = "http://localhost:8180/osiam-resource-server";
     private static final String CLIENT_ID = "example-client";
     private static final String CLIENT_SECRET = "secret";
-    
+
     private static OsiamConnector osiamConnector;
     private static AccessToken accessToken;
 
