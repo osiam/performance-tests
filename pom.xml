@@ -27,7 +27,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.osiam.tests</groupId>
     <artifactId>performance-tests</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -40,8 +40,8 @@
         <version.postgresql>9.1-901.jdbc4</version.postgresql>
 
         <!-- OSIAM -->
-        <version.org.osiam.server>0.16</version.org.osiam.server>
-        <version.org.osiam.connector4java>0.12</version.org.osiam.connector4java>
+        <version.org.osiam.server>1.1-SNAPSHOT</version.org.osiam.server>
+        <version.org.osiam.connector4java>1.1-SNAPSHOT</version.org.osiam.connector4java>
     </properties>
 
     <repositories>
