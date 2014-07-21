@@ -20,16 +20,17 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package org.osiam.tests.performance;
 
-import org.osiam.client.connector.OsiamConnector;
+import org.osiam.client.OsiamConnector;
 import org.osiam.client.oauth.AccessToken;
 
 public abstract class AbstractPerformanceTest extends PerformanceTestContext {
-    
+
     protected final OsiamConnector osiamConnector;
     protected final AccessToken accessToken;
-    
+
     protected AbstractPerformanceTest() {
         osiamConnector = PerformanceTestContext.getOsiamConnector();
         accessToken = PerformanceTestContext.getAccessToken();
