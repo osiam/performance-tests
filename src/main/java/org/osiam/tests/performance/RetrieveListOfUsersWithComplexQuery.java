@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 tarent AG
+ * Copyright (C) 2015 tarent solutions GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.osiam.client.query.Query;
 import org.osiam.client.query.QueryBuilder;
 
-public class RetrieveListOfUsersWithComplexQuery extends AbstractPerformanceTest {
+public class RetrieveListOfUsersWithComplexQuery extends PerformanceTestContext {
 
     @Test
     public void run() throws UnsupportedEncodingException {
@@ -37,6 +37,6 @@ public class RetrieveListOfUsersWithComplexQuery extends AbstractPerformanceTest
                 + " and (userName co \"er3\" or userName co \"4\")"
                 + " and (emails sw \"email3\" and emails.type eq \"work\")").build();
 
-        osiamConnector.searchUsers(query, accessToken);
+        OSIAM_CONNECTOR.searchUsers(query, ACCESS_TOKEN);
     }
 }

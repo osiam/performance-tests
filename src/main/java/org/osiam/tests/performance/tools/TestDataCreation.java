@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 tarent AG
+ * Copyright (C) 2015 tarent solutions GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -56,20 +56,16 @@ import org.osiam.resources.scim.Photo;
 import org.osiam.resources.scim.Role;
 import org.osiam.resources.scim.User;
 import org.osiam.resources.scim.X509Certificate;
+import org.osiam.tests.performance.PerformanceTestContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * class is used to create a number of test users and group in a database. Afterwards this data can be extracted as
  * dbunit database seed
- *
  */
 public class TestDataCreation {
 
-    private static final String AUTH_ENDPOINT_ADDRESS = "http://localhost:8180/osiam-auth-server";
-    private static final String RESOURCE_ENDPOINT_ADDRESS = "http://localhost:8180/osiam-resource-server";
-    private static final String CLIENT_ID = "example-client";
-    private static final String CLIENT_SECRET = "secret";
     private static OsiamConnector oConnector;
     private static AccessToken accessToken;
 
@@ -78,15 +74,15 @@ public class TestDataCreation {
     private static final String IRRELEVANT = "irrelevant";
     private static final String EXTENSION_SCHEMA = "urn:scim:extension:performance";
     private static final int MIN_COUNT_BYTE_BUFFER = 5000;
-    private static ArrayList<User> users = new ArrayList<User>();
+    private static ArrayList<User> users = new ArrayList<>();
 
-    public static void main(String[] args) throws Exception {
-        setupDb();
+    public static void start() {
+        setupDatabase();
         setupConnector();
         createTestUserAndGroups();
     }
 
-    public static void setupDb() {
+    private static void setupDatabase() {
         try (ConfigurableApplicationContext applicationContext = new ClassPathXmlApplicationContext("context.xml")) {
             IDatabaseConnection connection = new DatabaseDataSourceConnection(
                     (DataSource) applicationContext.getBean("dataSource"));
@@ -103,17 +99,16 @@ public class TestDataCreation {
         }
     }
 
-    public static void setupConnector() throws Exception {
-        OsiamConnector.Builder oConBuilder = new OsiamConnector.Builder().
-                setAuthServerEndpoint(AUTH_ENDPOINT_ADDRESS).
-                setResourceServerEndpoint(RESOURCE_ENDPOINT_ADDRESS).
-                setClientId(CLIENT_ID).
-                setClientSecret(CLIENT_SECRET);
+    private static void setupConnector() {
+        OsiamConnector.Builder oConBuilder = new OsiamConnector.Builder()
+                .setEndpoint(PerformanceTestContext.OSIAM_HOST)
+                .setClientId(PerformanceTestContext.CLIENT_ID)
+                .setClientSecret(PerformanceTestContext.CLIENT_SECRET);
         oConnector = oConBuilder.build();
         accessToken = oConnector.retrieveAccessToken("marissa", "koala", Scope.ADMIN);
     }
 
-    public static void createTestUserAndGroups() {
+    private static void createTestUserAndGroups() {
 
         long start = System.nanoTime();
 
@@ -136,14 +131,17 @@ public class TestDataCreation {
             System.out.println("Created Group " + groupIndex + "/" + NUMBER_GROUPS);
         }
 
+        final Group group = oConnector.getGroup(PerformanceTestContext.VALID_GROUP_ID, accessToken);
+        Group.Builder groupBuilder = new Group.Builder(group).setMembers(getMembers(1));
+        oConnector.replaceGroup(PerformanceTestContext.VALID_GROUP_ID, groupBuilder.build(), accessToken);
+
         long time = TimeUnit.SECONDS.convert(System.nanoTime() - start, TimeUnit.NANOSECONDS);
         System.out.println(time + " seconds needed to create the users and groups");
     }
 
     private static Set<MemberRef> getMembers(int countCurrentGroup) {
-
         int userPerGroup = NUMBER_USER / NUMBER_GROUPS;
-        Set<MemberRef> members = new HashSet<MemberRef>();
+        Set<MemberRef> members = new HashSet<>();
 
         for (int count = 0; count < userPerGroup; count++) {
             int currentUserPosition = userPerGroup * countCurrentGroup + count;
@@ -151,7 +149,6 @@ public class TestDataCreation {
                 MemberRef member = new MemberRef.Builder()
                         .setValue(users.get(currentUserPosition).getId()).build();
                 members.add(member);
-
             }
         }
         return members;
@@ -163,7 +160,7 @@ public class TestDataCreation {
         userBuilder.setActive(userCount % 2 == 0);
         userBuilder.addAddresses(getAddresses(userCount));
         userBuilder.setDisplayName("displayName" + userCount);
-        userBuilder.addEmails(getEmailaddress(userCount));
+        userBuilder.addEmails(getEmailAddresses(userCount));
         userBuilder.addEntitlements(getEntitlements(userCount));
         userBuilder.setExternalId("externalId" + userCount);
         userBuilder.addIms(getIms(userCount));
@@ -196,7 +193,7 @@ public class TestDataCreation {
 
     private static ArrayList<Address> getAddresses(int countCurrentUser) {
 
-        ArrayList<Address> addresses = new ArrayList<Address>();
+        ArrayList<Address> addresses = new ArrayList<>();
         addresses.add(getNewAddress(countCurrentUser, true, Address.Type.WORK));
         addresses.add(getNewAddress(countCurrentUser, false, Address.Type.HOME));
         addresses.add(getNewAddress(countCurrentUser, false, Address.Type.OTHER));
@@ -216,13 +213,11 @@ public class TestDataCreation {
                 .build();
     }
 
-    private static ArrayList<Email> getEmailaddress(int countCurrentUser) {
-
-        ArrayList<Email> emails = new ArrayList<Email>();
+    private static ArrayList<Email> getEmailAddresses(int countCurrentUser) {
+        ArrayList<Email> emails = new ArrayList<>();
         emails.add(getNewEmail(countCurrentUser, true, Email.Type.WORK));
         emails.add(getNewEmail(countCurrentUser, false, Email.Type.HOME));
         emails.add(getNewEmail(countCurrentUser, false, Email.Type.OTHER));
-
         return emails;
     }
 
@@ -235,29 +230,26 @@ public class TestDataCreation {
     }
 
     private static ArrayList<Entitlement> getEntitlements(int countCurrentUser) {
-
         Entitlement entitlement = new Entitlement.Builder()
                 .setPrimary(true)
                 .setType(new Entitlement.Type(IRRELEVANT))
                 .setValue("entitlement" + countCurrentUser)
                 .build();
 
-        ArrayList<Entitlement> entitlements = new ArrayList<Entitlement>();
+        ArrayList<Entitlement> entitlements = new ArrayList<>();
         entitlements.add(entitlement);
 
         return entitlements;
     }
 
     private static ArrayList<Im> getIms(int countCurrentUser) {
-
-        ArrayList<Im> ims = new ArrayList<Im>();
+        ArrayList<Im> ims = new ArrayList<>();
         ims.add(getNewIm(countCurrentUser, true, Im.Type.AIM));
         ims.add(getNewIm(countCurrentUser, false, Im.Type.GTALK));
         ims.add(getNewIm(countCurrentUser, false, Im.Type.ICQ));
         ims.add(getNewIm(countCurrentUser, false, Im.Type.MSN));
         ims.add(getNewIm(countCurrentUser, false, Im.Type.QQ));
         ims.add(getNewIm(countCurrentUser, false, Im.Type.XMPP));
-
         return ims;
     }
 
@@ -270,12 +262,10 @@ public class TestDataCreation {
     }
 
     private static ArrayList<PhoneNumber> getPhoneNumbers(int countCurrentUser) {
-
-        ArrayList<PhoneNumber> phoneNumbers = new ArrayList<PhoneNumber>();
+        ArrayList<PhoneNumber> phoneNumbers = new ArrayList<>();
         phoneNumbers.add(getNewPhoneNumber(countCurrentUser, true, PhoneNumber.Type.WORK));
         phoneNumbers.add(getNewPhoneNumber(countCurrentUser, false, PhoneNumber.Type.HOME));
         phoneNumbers.add(getNewPhoneNumber(countCurrentUser, false, PhoneNumber.Type.OTHER));
-
         return phoneNumbers;
     }
 
@@ -288,11 +278,9 @@ public class TestDataCreation {
     }
 
     private static ArrayList<Photo> getPhotos(int countCurrentUser) {
-
-        ArrayList<Photo> photos = new ArrayList<Photo>();
+        ArrayList<Photo> photos = new ArrayList<>();
         photos.add(getNewPhoto(countCurrentUser, true, Photo.Type.PHOTO));
         photos.add(getNewPhoto(countCurrentUser, false, Photo.Type.THUMBNAIL));
-
         return photos;
     }
 
@@ -310,20 +298,17 @@ public class TestDataCreation {
     }
 
     private static ArrayList<Role> getRoles(int countCurrentUser) {
-
         Role role = new Role.Builder()
                 .setPrimary(true)
                 .setValue("role" + countCurrentUser)
                 .build();
-
-        ArrayList<Role> roles = new ArrayList<Role>();
+        ArrayList<Role> roles = new ArrayList<>();
         roles.add(role);
 
         return roles;
     }
 
     private static ArrayList<X509Certificate> getX509Certificates() {
-
         X509Certificate x509Certificate = new X509Certificate.Builder()
                 .setPrimary(true)
                 .setValue("MIIBrTCCARagAwIBAgIFHL6O8kAwDQYJKoZIhvcNAQEFBQAwGDEWMBQGA1UEAxMNRXhhbXBsZUlz"
@@ -335,25 +320,22 @@ public class TestDataCreation {
                         + "KWtoNwSwUGjq+VhVcGqBfPEqDN8eC5DeCIxmQqkvxVQLe8hAZ4o5upSvfxvttj1NbSJMBf6NtDrB"
                         + "aVjjgqxSubteb6th+cqTsPdUsn5WfDbDjeuSa5d0fOEBzw==")
                 .build();
-
-        ArrayList<X509Certificate> x509Certificates = new ArrayList<X509Certificate>();
+        ArrayList<X509Certificate> x509Certificates = new ArrayList<>();
         x509Certificates.add(x509Certificate);
 
         return x509Certificates;
     }
 
     private static Extension getExtension(int countCurrentUser) {
-
-        Extension extension = new Extension.Builder(EXTENSION_SCHEMA)
-                .setField("stringValue", "Hello " + countCurrentUser)
-                .setField("integerValue", Integer.toString(countCurrentUser))
-                .setField("booleanValue", countCurrentUser % 2 == 0)
-                .setField("decimalValue", new BigDecimal(countCurrentUser))
-                .setField("dateValue", new Date())
-                .setField("binaryValue", getBigByteBuffer(countCurrentUser))
-                .setField("referenceValue", "https://example.com/Users/" + (countCurrentUser - 1))
+        return new Extension.Builder(EXTENSION_SCHEMA)
+                .setField("stringvalue", "Hello " + countCurrentUser)
+                .setField("integervalue", Integer.toString(countCurrentUser))
+                .setField("booleanvalue", countCurrentUser % 2 == 0)
+                .setField("decimalvalue", new BigDecimal(countCurrentUser))
+                .setField("datevalue", new Date())
+                .setField("binaryvalue", getBigByteBuffer(countCurrentUser))
+                .setField("referencevalue", "https://example.com/Users/" + (countCurrentUser - 1))
                 .build();
-        return extension;
     }
 
     private static ByteBuffer getBigByteBuffer(Integer countCurrentUser) {

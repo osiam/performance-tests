@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 tarent AG
+ * Copyright (C) 2015 tarent solutions GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -35,7 +35,7 @@ import org.osiam.client.query.Query;
 import org.osiam.client.query.QueryBuilder;
 import org.osiam.resources.scim.User;
 
-public class RetrieveSomeValuesInclusiveExtensionsOfUsersWithAnQuery extends AbstractPerformanceTest {
+public class RetrieveSomeValuesInclusiveExtensionsOfUsersWithAnQuery extends PerformanceTestContext {
 
     @Test
     public void run() throws UnsupportedEncodingException {
@@ -43,7 +43,7 @@ public class RetrieveSomeValuesInclusiveExtensionsOfUsersWithAnQuery extends Abs
                 + " and (userName co \"er3\" or userName co \"4\")"
                 + " and (emails sw \"email3\" and emails.type eq \"work\")")
                 .attributes("userName, displayName, emails, urn:scim:extension:performance").build();
-        List<User> users = osiamConnector.searchUsers(query, accessToken).getResources();
+        List<User> users = OSIAM_CONNECTOR.searchUsers(query, ACCESS_TOKEN).getResources();
         assertThat(users.size(), greaterThan(50));
         assertThat(users.size(), lessThan(150));
     }
