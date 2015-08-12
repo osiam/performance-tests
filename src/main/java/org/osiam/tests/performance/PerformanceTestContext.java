@@ -78,7 +78,7 @@ public class PerformanceTestContext {
         osiamConnector = oConBuilder.build();
 
         System.out.println("Retrieving access token");
-        accessToken = osiamConnector.retrieveAccessToken("marissa", "koala", Scope.ALL);
+        accessToken = osiamConnector.retrieveAccessToken("marissa", "koala", Scope.ADMIN);
     }
 
     @AfterClass

@@ -62,7 +62,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * class is used to create a number of test users and group in a database. Afterwards this data can be extracted as
  * dbunit database seed
- * 
+ *
  */
 public class TestDataCreation {
 
@@ -110,7 +110,7 @@ public class TestDataCreation {
                 setClientId(CLIENT_ID).
                 setClientSecret(CLIENT_SECRET);
         oConnector = oConBuilder.build();
-        accessToken = oConnector.retrieveAccessToken("marissa", "koala", Scope.ALL);
+        accessToken = oConnector.retrieveAccessToken("marissa", "koala", Scope.ADMIN);
     }
 
     public static void createTestUserAndGroups() {
