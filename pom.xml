@@ -63,7 +63,7 @@
 
         <!-- OSIAM -->
         <version.org.osiam.server>1.4-SNAPSHOT</version.org.osiam.server>
-        <version.org.osiam.connector4java>1.7-SNAPSHOT</version.org.osiam.connector4java>
+        <version.org.osiam.connector4java>1.8-SNAPSHOT</version.org.osiam.connector4java>
     </properties>
 
     <dependencies>
