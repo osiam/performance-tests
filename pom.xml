@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-    ~ Copyright (C) 2013 tarent AG
+    ~ Copyright (C) 2015 tarent solutions GmbH
     ~
     ~ Permission is hereby granted, free of charge, to any person obtaining
     ~ a copy of this software and associated documentation files (the
@@ -32,7 +32,7 @@
 
     <name>OSIAM performance tests</name>
     <description>The performance tests running against OSIAMs resource server with the connector4java</description>
-    <url>https://github.com/osiam/test-suites/tree/master/performance-tests</url>
+    <url>https://github.com/osiam/performance-tests</url>
     <licenses>
         <license>
             <name>The MIT License (MIT)</name>
@@ -40,6 +40,10 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
+    <prerequisites>
+        <maven>3.0.4</maven>
+    </prerequisites>
 
     <developers>
         <developer>
@@ -57,50 +61,65 @@
         <maven.build.timestamp.format>yyyyMMdd'T'HHmmss</maven.build.timestamp.format>
         <version.java>1.7</version.java>
 
-        <version.org.springframework>4.1.5.RELEASE</version.org.springframework>
-        <version.com.h2database>1.3.170</version.com.h2database>
-        <version.postgresql>9.3-1103-jdbc41</version.postgresql>
+        <docker.host>http://localhost:2375</docker.host>
+        <docker.removeIntermediateImages>true</docker.removeIntermediateImages>
+
+        <version.spring>4.2.1.RELEASE</version.spring>
+        <version.docker-maven-plugin>2.10.4</version.docker-maven-plugin>
 
         <!-- OSIAM -->
-        <version.org.osiam.server>1.4-SNAPSHOT</version.org.osiam.server>
-        <version.org.osiam.connector4java>1.8-SNAPSHOT</version.org.osiam.connector4java>
+        <version.osiam.auth-server>2.3-SNAPSHOT</version.osiam.auth-server>
+        <version.osiam.resource-server>2.3-SNAPSHOT</version.osiam.resource-server>
+        <version.osiam.connector4java>1.8-SNAPSHOT</version.osiam.connector4java>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.osiam</groupId>
             <artifactId>connector4java</artifactId>
-            <version>${version.org.osiam.connector4java}</version>
+            <version>${version.osiam.connector4java}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
-            <version>${version.org.springframework}</version>
+            <version>${version.spring}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${version.org.springframework}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.10</version>
+            <version>${version.spring}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <version>${version.org.springframework}</version>
+            <version>${version.spring}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.12</version>
         </dependency>
 
         <dependency>
             <groupId>org.dbunit</groupId>
             <artifactId>dbunit</artifactId>
-            <version>2.4.9</version>
+            <version>2.5.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.4-1202-jdbc41</version>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.36</version>
         </dependency>
 
         <dependency>
@@ -134,234 +153,6 @@
     </repositories>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.1</version>
-                    <configuration>
-                        <source>${version.java}</source>
-                        <target>${version.java}</target>
-                    </configuration>
-                </plugin>
-
-                <plugin>
-                    <groupId>com.github.goldin</groupId>
-                    <artifactId>copy-maven-plugin</artifactId>
-                    <version>0.2.5</version>
-                    <executions>
-                        <execution>
-                            <id>copy-deps-to-jmeter</id>
-                            <configuration>
-                                <resources>
-                                    <resource>
-                                        <targetPath>${project.build.directory}/jmeter/lib/junit</targetPath>
-                                        <dependency>
-                                            <groupId>${project.groupId}</groupId>
-                                            <artifactId>${project.artifactId}</artifactId>
-                                            <version>${project.version}</version>
-                                            <type>${project.packaging}</type>
-                                        </dependency>
-                                    </resource>
-                                    <resource>
-                                        <targetPath>${project.build.directory}/jmeter/lib</targetPath>
-                                        <dependency>
-                                            <includeScope>compile</includeScope>
-                                        </dependency>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>setup-performance-test</id>
-                            <configuration>
-                                <resources>
-                                    <resource>
-                                        <targetPath>${project.build.directory}/classes</targetPath>
-                                        <file>
-                                            ${project.basedir}/src/main/resources/${osiam.performance-tests.properties.file}
-                                        </file>
-                                        <destFileName>performance-tests.properties</destFileName>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>setup-osiam-webapps</id>
-                            <configuration>
-                                <resources>
-                                    <!-- Unpack OSIAM Resource Server -->
-                                    <resource>
-                                        <targetPath>
-                                            ${project.build.directory}/osiam-resource-server-${version.org.osiam.server}
-                                        </targetPath>
-                                        <dependencies>
-                                            <dependency>
-                                                <groupId>org.osiam</groupId>
-                                                <artifactId>osiam-resource-server</artifactId>
-                                                <version>${version.org.osiam.server}</version>
-                                                <type>war</type>
-                                            </dependency>
-                                        </dependencies>
-                                        <unpack>true</unpack>
-                                    </resource>
-                                    <!-- Resource Server: Copy DB Config -->
-                                    <resource>
-                                        <targetPath>
-                                            ${project.build.directory}/osiam-resource-server-${version.org.osiam.server}/WEB-INF
-                                        </targetPath>
-                                        <file>
-                                            ${project.basedir}/src/main/resources/resource-server-configuration/jpa-configuration.xml
-                                        </file>
-                                    </resource>
-                                    <!-- Resource Server: Copy .properties -->
-                                    <resource>
-                                        <targetPath>
-                                            ${project.build.directory}/osiam-resource-server-${version.org.osiam.server}/WEB-INF/classes
-                                        </targetPath>
-                                        <file>
-                                            ${project.basedir}/src/main/resources/resource-server-configuration/${osiam.resource-server.properties.file}
-                                        </file>
-                                        <destFileName>resource-server.properties</destFileName>
-                                    </resource>
-                                    <!-- Unpack OSIAM Auth Server -->
-                                    <resource>
-                                        <targetPath>
-                                            ${project.build.directory}/osiam-auth-server-${version.org.osiam.server}
-                                        </targetPath>
-                                        <dependencies>
-                                            <dependency>
-                                                <groupId>org.osiam</groupId>
-                                                <artifactId>osiam-auth-server</artifactId>
-                                                <version>${version.org.osiam.server}</version>
-                                                <type>war</type>
-                                            </dependency>
-                                        </dependencies>
-                                        <unpack>true</unpack>
-                                    </resource>
-                                    <!-- Auth Server: Copy DB Config -->
-                                    <resource>
-                                        <targetPath>
-                                            ${project.build.directory}/osiam-auth-server-${version.org.osiam.server}/WEB-INF
-                                        </targetPath>
-                                        <file>
-                                            ${project.basedir}/src/main/resources/auth-server-configuration/jpa-configuration.xml
-                                        </file>
-                                    </resource>
-                                    <!-- Auth Server: Copy .properties -->
-                                    <resource>
-                                        <targetPath>
-                                            ${project.build.directory}/osiam-auth-server-${version.org.osiam.server}/WEB-INF/classes
-                                        </targetPath>
-                                        <file>
-                                            ${project.basedir}/src/main/resources/auth-server-configuration/${osiam.auth-server.properties.file}
-                                        </file>
-                                        <destFileName>auth-server.properties</destFileName>
-                                    </resource>
-                                    <!-- Auth Server: Copy the rest -->
-                                    <resource>
-                                        <targetPath>
-                                            ${project.build.directory}/osiam-auth-server-${version.org.osiam.server}/WEB-INF/classes/auth-server
-                                        </targetPath>
-                                        <directory>
-                                            ${project.basedir}/src/main/resources/auth-server-configuration/auth-server
-                                        </directory>
-                                        <preservePath>true</preservePath>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <plugin>
-                    <groupId>com.edugility</groupId>
-                    <artifactId>h2-maven-plugin</artifactId>
-                    <version>1.0</version>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.eclipse.jetty</groupId>
-                    <artifactId>jetty-maven-plugin</artifactId>
-                    <version>9.2.10.v20150310</version>
-                    <configuration>
-                        <requestLog implementation="org.eclipse.jetty.server.NCSARequestLog">
-                            <filename>target/yyyy_mm_dd.request.log</filename>
-                            <retainDays>90</retainDays>
-                            <append>true</append>
-                            <extended>false</extended>
-                            <logTimeZone>GMT</logTimeZone>
-                        </requestLog>
-                        <scanIntervalSeconds>10</scanIntervalSeconds>
-                        <stopPort>8005</stopPort>
-                        <stopKey>STOP</stopKey>
-                        <contextHandlers>
-                            <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
-                                <war>${project.build.directory}/osiam-auth-server-${version.org.osiam.server}</war>
-                                <contextPath>/osiam-auth-server</contextPath>
-                            </contextHandler>
-                            <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
-                                <war>${project.build.directory}/osiam-resource-server-${version.org.osiam.server}</war>
-                                <contextPath>/osiam-resource-server</contextPath>
-                            </contextHandler>
-                        </contextHandlers>
-                        <jettyXml>src/main/resources/jetty.xml</jettyXml>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>start-jetty</id>
-                            <goals>
-                                <goal>start</goal>
-                            </goals>
-                            <configuration>
-                                <scanIntervalSeconds>0</scanIntervalSeconds>
-                                <daemon>true</daemon>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>stop-jetty</id>
-                            <goals>
-                                <goal>stop</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <plugin>
-                    <groupId>com.lazerycode.jmeter</groupId>
-                    <artifactId>jmeter-maven-plugin</artifactId>
-                    <version>1.10.0</version>
-                    <dependencies>
-                        <!--
-                            needed to override httpclient dependency from jmeter.
-                            try to keep version in sync with connector4java's
-                            as close as possible.
-                        -->
-                        <dependency>
-                            <groupId>org.apache.httpcomponents</groupId>
-                            <artifactId>httpclient</artifactId>
-                            <version>4.4</version>
-                        </dependency>
-                    </dependencies>
-                    <executions>
-                        <execution>
-                            <id>jmeter-tests</id>
-                            <goals>
-                                <goal>jmeter</goal>
-                            </goals>
-                            <configuration>
-                                <propertiesJMeter>
-                                    <jmeter.exit.check.pause>10000</jmeter.exit.check.pause>
-                                </propertiesJMeter>
-                                <suppressJMeterOutput>false</suppressJMeterOutput>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
-            </plugins>
-        </pluginManagement>
-
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -373,41 +164,197 @@
         </resources>
 
         <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>${version.java}</source>
+                    <target>${version.java}</target>
+                </configuration>
+            </plugin>
 
             <plugin>
-                <groupId>com.github.goldin</groupId>
-                <artifactId>copy-maven-plugin</artifactId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <outputDirectory>${project.build.directory}/jmeter/lib/junit</outputDirectory>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy-deps-to-jmeter</id>
+                        <id>download-osiam-resource-server</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.osiam</groupId>
+                                    <artifactId>resource-server</artifactId>
+                                    <version>${version.osiam.resource-server}</version>
+                                    <type>war</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>
+                                ${project.build.directory}/osiam-resource-server
+                            </outputDirectory>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-osiam-auth-server</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.osiam</groupId>
+                                    <artifactId>auth-server</artifactId>
+                                    <version>${version.osiam.auth-server}</version>
+                                    <type>war</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/osiam-auth-server
+                            </outputDirectory>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-dependencies</id>
                         <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/jmeter/lib</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>1.0.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-properties</id>
                         <goals>
                             <goal>copy</goal>
                         </goals>
+                        <configuration>
+                            <fileSets>
+                                <!-- resource-server -->
+                                <fileSet>
+                                    <sourceFile>
+                                        src/main/resources/resource-server_${database}.properties
+                                    </sourceFile>
+                                    <destinationFile>
+                                        ${project.build.directory}/osiam-resource-server/WEB-INF/classes/resource-server.properties
+                                    </destinationFile>
+                                </fileSet>
+                                <!-- auth-server -->
+                                <fileSet>
+                                    <sourceFile>
+                                        src/main/resources/auth-server_${database}.properties
+                                    </sourceFile>
+                                    <destinationFile>
+                                        ${project.build.directory}/osiam-auth-server/WEB-INF/classes/auth-server.properties
+                                    </destinationFile>
+                                </fileSet>
+                                <!-- performance-tests -->
+                                <fileSet>
+                                    <sourceFile>
+                                        src/main/resources/performance-tests_${database}.properties
+                                    </sourceFile>
+                                    <destinationFile>
+                                        src/main/resources/performance-tests.properties
+                                    </destinationFile>
+                                </fileSet>
+                            </fileSets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.alexecollins.docker</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>${version.docker-maven-plugin}</version>
+                <configuration>
+                    <version>1.16</version>
+                    <host>${docker.host}</host>
+                    <exclude>${excluded.container}</exclude>
+                    <removeIntermediateImages>${docker.removeIntermediateImages}</removeIntermediateImages>
+                    <cache>false</cache>
+                    <permissionErrorTolerant>true</permissionErrorTolerant>
+                    <quiet>true</quiet>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>clean-docker-images</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
                     </execution>
                     <execution>
-                        <id>setup-performance-test</id>
-                        <phase>process-resources</phase>
+                        <id>start-docker-container</id>
+                        <phase>pre-integration-test</phase>
                         <goals>
-                            <goal>copy</goal>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop-docker-container</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
 
             <plugin>
-                <groupId>com.edugility</groupId>
-                <artifactId>h2-maven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
                 <groupId>com.lazerycode.jmeter</groupId>
                 <artifactId>jmeter-maven-plugin</artifactId>
+                <version>1.10.1</version>
+                <dependencies>
+                    <!--
+                        needed to override httpclient dependency from jmeter.
+                        try to keep version in sync with connector4java's
+                        as close as possible.
+                    -->
+                    <dependency>
+                        <groupId>org.apache.httpcomponents</groupId>
+                        <artifactId>httpclient</artifactId>
+                        <version>4.5.1</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>jmeter-tests</id>
+                        <goals>
+                            <goal>jmeter</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                        <configuration>
+                            <propertiesJMeter>
+                                <jmeter.exit.check.pause>10000</jmeter.exit.check.pause>
+                            </propertiesJMeter>
+                            <suppressJMeterOutput>false</suppressJMeterOutput>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -446,9 +393,8 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.16</version>
+                <version>2.18.1</version>
                 <configuration>
                     <skipTests>true</skipTests>
                 </configuration>
@@ -457,441 +403,23 @@
     </build>
 
     <profiles>
-        <!-- Running tests in IDE -->
         <profile>
-            <id>ide-h2</id>
-            <properties>
-                <osiam.auth-server.properties.file>
-                    auth-server_h2.properties
-                </osiam.auth-server.properties.file>
-                <osiam.resource-server.properties.file>
-                    resource-server_h2.properties
-                </osiam.resource-server.properties.file>
-                <osiam.performance-tests.properties.file>
-                    performance-tests_h2.properties
-                </osiam.performance-tests.properties.file>
-            </properties>
-
-            <dependencies>
-                <dependency>
-                    <groupId>com.h2database</groupId>
-                    <artifactId>h2</artifactId>
-                    <version>${version.com.h2database}</version>
-                </dependency>
-            </dependencies>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.github.goldin</groupId>
-                        <artifactId>copy-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>setup-osiam-webapps</id>
-                                <phase>initialize</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
-                        <dependencies>
-                            <dependency>
-                                <groupId>com.h2database</groupId>
-                                <artifactId>h2</artifactId>
-                                <version>${version.com.h2database}</version>
-                            </dependency>
-                        </dependencies>
-                        <configuration>
-                            <scanIntervalSeconds>0</scanIntervalSeconds>
-                        </configuration>
-                    </plugin>
-
-                </plugins>
-            </build>
-        </profile>
-
-        <!-- Running tests in IDE with postgresql -->
-        <profile>
-            <id>ide-pg</id>
-
-            <properties>
-                <osiam.auth-server.properties.file>
-                    auth-server_pg.properties
-                </osiam.auth-server.properties.file>
-                <osiam.resource-server.properties.file>
-                    resource-server_pg.properties
-                </osiam.resource-server.properties.file>
-                <osiam.performance-tests.properties.file>
-                    performance-tests_pg.properties
-                </osiam.performance-tests.properties.file>
-            </properties>
-
-            <dependencies>
-                <dependency>
-                    <groupId>org.postgresql</groupId>
-                    <artifactId>postgresql</artifactId>
-                    <version>${version.postgresql}</version>
-                </dependency>
-            </dependencies>
-
-            <build>
-                <plugins>
-
-                    <plugin>
-                        <groupId>com.github.goldin</groupId>
-                        <artifactId>copy-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>setup-osiam-webapps</id>
-                                <phase>initialize</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.postgresql</groupId>
-                                <artifactId>postgresql</artifactId>
-                                <version>${version.postgresql}</version>
-                            </dependency>
-                        </dependencies>
-                        <configuration>
-                            <scanIntervalSeconds>0</scanIntervalSeconds>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <!-- tools-generate-test-data -->
-        <profile>
-            <id>tools-generate-test-data</id>
-
-            <properties>
-                <osiam.auth-server.properties.file>
-                    auth-server_h2.properties
-                </osiam.auth-server.properties.file>
-                <osiam.resource-server.properties.file>
-                    resource-server_h2.properties
-                </osiam.resource-server.properties.file>
-                <osiam.performance-tests.properties.file>
-                    performance-tests_h2.properties
-                </osiam.performance-tests.properties.file>
-            </properties>
-
-            <dependencies>
-                <dependency>
-                    <groupId>com.h2database</groupId>
-                    <artifactId>h2</artifactId>
-                    <version>${version.com.h2database}</version>
-                </dependency>
-            </dependencies>
-
-            <build>
-                <plugins>
-                    <!-- copies osiam_h2.properties into file osiam.properties -->
-                    <plugin>
-                        <groupId>com.github.goldin</groupId>
-                        <artifactId>copy-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>setup-osiam-webapps</id>
-                                <phase>initialize</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <!-- creates the database seed from the created data in the database -->
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>dbunit-maven-plugin</artifactId>
-                        <version>1.0-beta-3</version>
-                        <dependencies>
-                            <dependency>
-                                <groupId>com.h2database</groupId>
-                                <artifactId>h2</artifactId>
-                                <version>${version.com.h2database}</version>
-                            </dependency>
-                        </dependencies>
-                        <configuration>
-                            <dataTypeFactoryName>org.dbunit.ext.h2.H2DataTypeFactory</dataTypeFactoryName>
-                            <driver>org.h2.Driver</driver>
-                            <url>jdbc:h2:tcp://localhost/mem:osiam</url>
-                            <username>sa</username>
-                            <password>sa</password>
-                            <format>flat</format>
-                            <ordered>true</ordered>
-                            <dest>src/main/resources/database_seed.xml</dest>
-                            <src>src/main/resources/database_seed.xml</src>
-                            <type>CLEAN_INSERT</type>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>dump</id>
-                                <phase>generate-test-resources</phase>
-                                <goals>
-                                    <goal>export</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <!-- starts the h2 database -->
-                    <plugin>
-                        <groupId>com.edugility</groupId>
-                        <artifactId>h2-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>spawn-h2</id>
-                                <phase>initialize</phase>
-                                <goals>
-                                    <goal>spawn</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>stop-h2</id>
-                                <phase>generate-test-resources</phase>
-                                <goals>
-                                    <goal>stop</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <!-- starts the jetty for the OSIAM server -->
-                    <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
-                        <dependencies>
-                            <dependency>
-                                <groupId>com.h2database</groupId>
-                                <artifactId>h2</artifactId>
-                                <version>${version.com.h2database}</version>
-                            </dependency>
-                        </dependencies>
-                        <executions>
-                            <execution>
-                                <id>start-jetty</id>
-                                <phase>initialize</phase>
-                            </execution>
-                            <execution>
-                                <id>stop-jetty</id>
-                                <phase>generate-test-resources</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <!-- creates the test data and saves them into the database -->
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>1.2.1</version>
-                        <executions>
-                            <execution>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>java</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <mainClass>org.osiam.tests.performance.tools.TestDataCreation</mainClass>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <!-- Local Server + H2 Database -->
-        <profile>
-            <id>local-h2</id>
-
+            <id>postgres</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
-
             <properties>
-                <osiam.auth-server.properties.file>
-                    auth-server_h2.properties
-                </osiam.auth-server.properties.file>
-                <osiam.resource-server.properties.file>
-                    resource-server_h2.properties
-                </osiam.resource-server.properties.file>
-                <osiam.performance-tests.properties.file>
-                    performance-tests_h2.properties
-                </osiam.performance-tests.properties.file>
+                <database>postgres</database>
+                <excluded.container>mysql</excluded.container>
             </properties>
-
-            <dependencies>
-                <dependency>
-                    <groupId>com.h2database</groupId>
-                    <artifactId>h2</artifactId>
-                    <version>${version.com.h2database}</version>
-                </dependency>
-            </dependencies>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.github.goldin</groupId>
-                        <artifactId>copy-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>setup-osiam-webapps</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>com.edugility</groupId>
-                        <artifactId>h2-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>spawn-h2</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>spawn</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>stop-h2</id>
-                                <phase>post-integration-test</phase>
-                                <goals>
-                                    <goal>stop</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
-                        <dependencies>
-                            <dependency>
-                                <groupId>com.h2database</groupId>
-                                <artifactId>h2</artifactId>
-                                <version>${version.com.h2database}</version>
-                            </dependency>
-                        </dependencies>
-                        <executions>
-                            <execution>
-                                <id>start-jetty</id>
-                                <phase>pre-integration-test</phase>
-                            </execution>
-                            <execution>
-                                <id>stop-jetty</id>
-                                <phase>post-integration-test</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>com.lazerycode.jmeter</groupId>
-                        <artifactId>jmeter-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>jmeter-tests</id>
-                                <phase>integration-test</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                </plugins>
-            </build>
         </profile>
 
-        <!-- Local Server + postgreSQL Database -->
         <profile>
-            <id>local-postgres</id>
-
+            <id>mysql</id>
             <properties>
-                <osiam.auth-server.properties.file>
-                    auth-server_pg.properties
-                </osiam.auth-server.properties.file>
-                <osiam.resource-server.properties.file>
-                    resource-server_pg.properties
-                </osiam.resource-server.properties.file>
-                <osiam.performance-tests.properties.file>
-                    performance-tests_pg.properties
-                </osiam.performance-tests.properties.file>
+                <database>mysql</database>
+                <excluded.container>postgres</excluded.container>
             </properties>
-
-            <dependencies>
-                <dependency>
-                    <groupId>org.postgresql</groupId>
-                    <artifactId>postgresql</artifactId>
-                    <version>${version.postgresql}</version>
-                </dependency>
-            </dependencies>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.github.goldin</groupId>
-                        <artifactId>copy-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>setup-osiam-webapps</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.postgresql</groupId>
-                                <artifactId>postgresql</artifactId>
-                                <version>${version.postgresql}</version>
-                            </dependency>
-                        </dependencies>
-                        <executions>
-                            <execution>
-                                <id>start-jetty</id>
-                                <phase>pre-integration-test</phase>
-                            </execution>
-                            <execution>
-                                <id>stop-jetty</id>
-                                <phase>post-integration-test</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>com.lazerycode.jmeter</groupId>
-                        <artifactId>jmeter-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>jmeter-tests</id>
-                                <phase>integration-test</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
     </profiles>
 </project>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 tarent AG
+ * Copyright (C) 2015 tarent solutions GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -23,94 +23,35 @@
 
 package org.osiam.tests.performance;
 
-import javax.sql.DataSource;
-
-import org.dbunit.database.DatabaseDataSourceConnection;
-import org.dbunit.database.IDatabaseConnection;
-import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
-import org.dbunit.operation.DatabaseOperation;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.osiam.client.OsiamConnector;
 import org.osiam.client.oauth.AccessToken;
 import org.osiam.client.oauth.Scope;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.osiam.tests.performance.tools.TestDataCreation;
 
 public class PerformanceTestContext {
-    public static final String VALID_USER_ID = "be108952-0667-42a9-864e-3e1012f1234a";
-    public static final String VALID_GROUP_ID = "0c24ab45-ae2a-43fe-8e9b-37581175c87c";
 
-    private static final String AUTH_ENDPOINT_ADDRESS = "http://localhost:8180/osiam-auth-server";
-    private static final String RESOURCE_ENDPOINT_ADDRESS = "http://localhost:8180/osiam-resource-server";
-    private static final String CLIENT_ID = "example-client";
-    private static final String CLIENT_SECRET = "secret";
+    public static final String VALID_USER_ID = "cef9452e-00a9-4cec-a086-d171374ffbef";
+    public static final String VALID_GROUP_ID = "098b0e9c-d51b-4103-8222-b5c3f74249ff";
 
-    private static OsiamConnector osiamConnector;
-    private static AccessToken accessToken;
+    public static final String OSIAM_HOST = "http://localhost:8280";
+    public static final String CLIENT_ID = "example-client";
+    public static final String CLIENT_SECRET = "secret";
 
-    @BeforeClass
-    public static void setupDB() {
-        System.out.println("Setting up DB");
-        try (ConfigurableApplicationContext applicationContext = new ClassPathXmlApplicationContext("context.xml")) {
-            IDatabaseConnection connection = new DatabaseDataSourceConnection(
-                    (DataSource) applicationContext.getBean("dataSource"));
+    public static final OsiamConnector OSIAM_CONNECTOR;
+    public static final AccessToken ACCESS_TOKEN;
 
-            try {
-                DatabaseOperation.CLEAN_INSERT.execute(connection,
-                        new FlatXmlDataSetBuilder().build(
-                                applicationContext.getResource("/database_seed.xml").getInputStream()));
-            } finally {
-                connection.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    static {
+        System.out.println("Setting up data");
+        TestDataCreation.start();
 
         System.out.println("Setting up Connector");
-        OsiamConnector.Builder oConBuilder = new OsiamConnector.Builder().
-                setAuthServerEndpoint(AUTH_ENDPOINT_ADDRESS).
-                setResourceServerEndpoint(RESOURCE_ENDPOINT_ADDRESS).
-                setClientId(CLIENT_ID).
-                setClientSecret(CLIENT_SECRET);
-        osiamConnector = oConBuilder.build();
+        OsiamConnector.Builder oConBuilder = new OsiamConnector.Builder()
+                .setEndpoint(OSIAM_HOST)
+                .setClientId(CLIENT_ID)
+                .setClientSecret(CLIENT_SECRET);
+        OSIAM_CONNECTOR = oConBuilder.build();
 
         System.out.println("Retrieving access token");
-        accessToken = osiamConnector.retrieveAccessToken("marissa", "koala", Scope.ADMIN);
+        ACCESS_TOKEN = OSIAM_CONNECTOR.retrieveAccessToken("marissa", "koala", Scope.ADMIN);
     }
-
-    @AfterClass
-    public static void tearDownDB() {
-        System.out.println("Tearing down DB");
-        try (ConfigurableApplicationContext applicationContext = new ClassPathXmlApplicationContext("context.xml")) {
-            IDatabaseConnection connection = new DatabaseDataSourceConnection(
-                    (DataSource) applicationContext.getBean("dataSource"));
-
-            try {
-                DatabaseOperation.DELETE_ALL.execute(connection,
-                        new FlatXmlDataSetBuilder().build(
-                                applicationContext.getResource("/database_tear_down.xml").getInputStream()));
-            } finally {
-                connection.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static OsiamConnector getOsiamConnector() {
-        return osiamConnector;
-    }
-
-    public static AccessToken getAccessToken() {
-        return accessToken;
-    }
-
-    @Test
-    @Ignore("Needed for JMeter to run @BeforeClass and @AfterClass methods")
-    public void dummy() {
-    }
-
 }

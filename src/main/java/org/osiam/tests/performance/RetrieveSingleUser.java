@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 tarent AG
+ * Copyright (C) 2015 tarent solutions GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -25,10 +25,10 @@ package org.osiam.tests.performance;
 
 import org.junit.Test;
 
-public class RetrieveSingleUser extends AbstractPerformanceTest {
+public class RetrieveSingleUser extends PerformanceTestContext {
 
     @Test
     public void run() {
-        osiamConnector.getUser(PerformanceTestContext.VALID_USER_ID, accessToken);
+        OSIAM_CONNECTOR.getUser(PerformanceTestContext.VALID_USER_ID, ACCESS_TOKEN);
     }
 }

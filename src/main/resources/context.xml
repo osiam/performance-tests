@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-  ~ Copyright (C) 2013 tarent AG
+  ~ Copyright (C) 2015 tarent solutions GmbH
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining
   ~ a copy of this software and associated documentation files (the
@@ -23,8 +23,8 @@
 -->
 
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="dbProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="location" value="classpath:performance-tests.properties"/>
@@ -36,5 +36,4 @@
         <property name="username" value="${org.osiam.performance-tests.db.username}"/>
         <property name="password" value="${org.osiam.performance-tests.db.password}"/>
     </bean>
-
 </beans>
