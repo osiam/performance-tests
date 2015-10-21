@@ -8,13 +8,12 @@ You can run the performance-tests on your machine, you only need to install
 java, maven and docker, and configure docker.
 
 The tests will fetch the snapshot dependencies from evolvis or you clone the
-following repos and install them with ```mvn clean install```
+following repos and install them with `mvn clean install`
 
 ```
 https://github.com/osiam/scim-schema
 https://github.com/osiam/connector4java
-https://github.com/osiam/auth-server
-https://github.com/osiam/resource-server
+https://github.com/osiam/osiam
 ```
 
 ### Configure Docker

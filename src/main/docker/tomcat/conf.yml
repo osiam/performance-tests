@@ -1,7 +1,6 @@
 packaging:
   add:
-    - target/osiam-auth-server
-    - target/osiam-resource-server
+    - target/osiam
 
 links:
   - ${database}
@@ -13,6 +12,6 @@ healthChecks:
   pings:
     - url: http://localhost:8280/manager/text/list
       timeout: 80000
-      pattern: osiam-resource-server:running
+      pattern: osiam:running
 
 tag: ${project.artifactId}_tomcat-${database}
