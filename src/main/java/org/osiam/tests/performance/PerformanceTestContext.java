@@ -33,7 +33,7 @@ public class PerformanceTestContext {
     public static final String VALID_USER_ID = "cef9452e-00a9-4cec-a086-d171374ffbef";
     public static final String VALID_GROUP_ID = "098b0e9c-d51b-4103-8222-b5c3f74249ff";
 
-    public static final String OSIAM_HOST = "http://localhost:8280";
+    public static final String OSIAM_HOST = "http://localhost:8280/osiam";
     public static final String CLIENT_ID = "example-client";
     public static final String CLIENT_SECRET = "secret";
 
