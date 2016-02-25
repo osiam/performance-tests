@@ -23,17 +23,17 @@
 
 package org.osiam.tests.performance;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.Assert.assertThat;
-
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-
 import org.junit.Test;
 import org.osiam.client.query.Query;
 import org.osiam.client.query.QueryBuilder;
 import org.osiam.resources.scim.User;
+
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertThat;
 
 public class RetrieveSomeValuesOfUsersWithAnQuery extends PerformanceTestContext {
 

@@ -23,26 +23,10 @@
 
 package org.osiam.tests.performance.tools;
 
-import java.math.BigDecimal;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import javax.sql.DataSource;
-
 import org.dbunit.database.DatabaseDataSourceConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
-import org.osiam.client.OsiamConnector;
-import org.osiam.client.oauth.AccessToken;
-import org.osiam.client.oauth.Scope;
 import org.osiam.resources.scim.Address;
 import org.osiam.resources.scim.Email;
 import org.osiam.resources.scim.Entitlement;
@@ -57,8 +41,25 @@ import org.osiam.resources.scim.Role;
 import org.osiam.resources.scim.User;
 import org.osiam.resources.scim.X509Certificate;
 import org.osiam.tests.performance.PerformanceTestContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import javax.sql.DataSource;
+import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import static org.osiam.tests.performance.PerformanceTestContext.ACCESS_TOKEN;
+import static org.osiam.tests.performance.PerformanceTestContext.OSIAM_CONNECTOR;
 
 /**
  * class is used to create a number of test users and group in a database. Afterwards this data can be extracted as
@@ -66,8 +67,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class TestDataCreation {
 
-    private static OsiamConnector oConnector;
-    private static AccessToken accessToken;
+    private static final Logger logger = LoggerFactory.getLogger(TestDataCreation.class);
 
     private static final int NUMBER_USER = 1000;
     private static final int NUMBER_GROUPS = 50;
@@ -76,14 +76,9 @@ public class TestDataCreation {
     private static final int MIN_COUNT_BYTE_BUFFER = 5000;
     private static ArrayList<User> users = new ArrayList<>();
 
-    public static void start() {
-        setupDatabase();
-        setupConnector();
-        createTestUserAndGroups();
-    }
-
-    private static void setupDatabase() {
-        try (ConfigurableApplicationContext applicationContext = new ClassPathXmlApplicationContext("context.xml")) {
+    public static void setupDatabase() {
+        logger.info("Start database setup");
+        try (ConfigurableApplicationContext applicationContext = new ClassPathXmlApplicationContext("/context.xml")) {
             IDatabaseConnection connection = new DatabaseDataSourceConnection(
                     (DataSource) applicationContext.getBean("dataSource"));
 
@@ -91,34 +86,29 @@ public class TestDataCreation {
                 DatabaseOperation.CLEAN_INSERT.execute(connection,
                         new FlatXmlDataSetBuilder().build(
                                 applicationContext.getResource("/database_seed_minimal.xml").getInputStream()));
+            } catch (Exception e) {
+                logger.error(e.getMessage());
             } finally {
                 connection.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
+        logger.info("Finished database setup");
     }
 
-    private static void setupConnector() {
-        OsiamConnector.Builder oConBuilder = new OsiamConnector.Builder()
-                .setEndpoint(PerformanceTestContext.OSIAM_HOST)
-                .setClientId(PerformanceTestContext.CLIENT_ID)
-                .setClientSecret(PerformanceTestContext.CLIENT_SECRET);
-        oConnector = oConBuilder.build();
-        accessToken = oConnector.retrieveAccessToken("marissa", "koala", Scope.ADMIN);
-    }
-
-    private static void createTestUserAndGroups() {
+    public static void createTestUserAndGroups() {
+        logger.info("Start creation of tests user and groups");
 
         long start = System.nanoTime();
 
         for (int userIndex = 1; userIndex <= NUMBER_USER; userIndex++) {
             User user = getNewUser(userIndex);
-            user = oConnector.createUser(user, accessToken);
+            user = OSIAM_CONNECTOR.createUser(user, ACCESS_TOKEN);
 
             users.add(user);
 
-            System.out.println("Created User " + userIndex + "/" + NUMBER_USER);
+            logger.info("Created User " + userIndex + "/" + NUMBER_USER);
         }
 
         for (int groupIndex = 1; groupIndex <= NUMBER_GROUPS; groupIndex++) {
@@ -126,17 +116,17 @@ public class TestDataCreation {
             groupBuilder.setExternalId("GrExternalId" + groupIndex);
             groupBuilder.setMembers(getMembers(groupIndex));
 
-            oConnector.createGroup(groupBuilder.build(), accessToken);
+            OSIAM_CONNECTOR.createGroup(groupBuilder.build(), ACCESS_TOKEN);
 
-            System.out.println("Created Group " + groupIndex + "/" + NUMBER_GROUPS);
+            logger.info("Created Group " + groupIndex + "/" + NUMBER_GROUPS);
         }
 
-        final Group group = oConnector.getGroup(PerformanceTestContext.VALID_GROUP_ID, accessToken);
+        final Group group = OSIAM_CONNECTOR.getGroup(PerformanceTestContext.VALID_GROUP_ID, ACCESS_TOKEN);
         Group.Builder groupBuilder = new Group.Builder(group).setMembers(getMembers(1));
-        oConnector.replaceGroup(PerformanceTestContext.VALID_GROUP_ID, groupBuilder.build(), accessToken);
+        OSIAM_CONNECTOR.replaceGroup(PerformanceTestContext.VALID_GROUP_ID, groupBuilder.build(), ACCESS_TOKEN);
 
         long time = TimeUnit.SECONDS.convert(System.nanoTime() - start, TimeUnit.NANOSECONDS);
-        System.out.println(time + " seconds needed to create the users and groups");
+        logger.info("Finished creation of tests user and groups. {} seconds needed.", time);
     }
 
     private static Set<MemberRef> getMembers(int countCurrentGroup) {

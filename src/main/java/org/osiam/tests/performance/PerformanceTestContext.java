@@ -27,8 +27,12 @@ import org.osiam.client.OsiamConnector;
 import org.osiam.client.oauth.AccessToken;
 import org.osiam.client.oauth.Scope;
 import org.osiam.tests.performance.tools.TestDataCreation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PerformanceTestContext {
+
+    private static final Logger logger = LoggerFactory.getLogger(PerformanceTestContext.class);
 
     public static final String VALID_USER_ID = "cef9452e-00a9-4cec-a086-d171374ffbef";
     public static final String VALID_GROUP_ID = "098b0e9c-d51b-4103-8222-b5c3f74249ff";
@@ -41,17 +45,20 @@ public class PerformanceTestContext {
     public static final AccessToken ACCESS_TOKEN;
 
     static {
-        System.out.println("Setting up data");
-        TestDataCreation.start();
+        logger.info("Setting up database");
+        TestDataCreation.setupDatabase();
 
-        System.out.println("Setting up Connector");
+        logger.info("Setting up Connector");
         OsiamConnector.Builder oConBuilder = new OsiamConnector.Builder()
-                .setEndpoint(OSIAM_HOST)
+                .withEndpoint(OSIAM_HOST)
                 .setClientId(CLIENT_ID)
                 .setClientSecret(CLIENT_SECRET);
         OSIAM_CONNECTOR = oConBuilder.build();
 
-        System.out.println("Retrieving access token");
+        logger.info("Retrieving access token");
         ACCESS_TOKEN = OSIAM_CONNECTOR.retrieveAccessToken("marissa", "koala", Scope.ADMIN);
+
+        logger.info("Setting up test data");
+        TestDataCreation.createTestUserAndGroups();
     }
 }

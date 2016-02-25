@@ -1,0 +1,17 @@
+osiam:
+
+  #
+  # Database configuration
+  #
+  db:
+
+    #
+    # MySQL
+    #
+    vendor: mysql
+    driver: com.mysql.jdbc.Driver
+    url: jdbc:mysql://mysql:3306/osiam?useSSL=false
+    username: osiam
+    password: osiam
+
+spring.thymeleaf.check-template-location: false

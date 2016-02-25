@@ -16,6 +16,7 @@ test:
   override:
     - /bin/bash circle.sh:
         parallel: true
+        timeout: 1500
   post:
     - /bin/bash report.sh:
         parallel: true
