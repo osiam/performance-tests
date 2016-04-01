@@ -1,6 +1,6 @@
 packaging:
   add:
-    - target/osiam
+    - target/dependency/osiam.war
 
 links:
   - ${database}

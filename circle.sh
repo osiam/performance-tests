@@ -2,9 +2,9 @@
 
 case $CIRCLE_NODE_INDEX in
     0)
-        mvn verify -P postgres
+        mvn -q verify -P postgres
         ;;
     1)
-        mvn verify -P mysql
+        mvn -q verify -P mysql
         ;;
 esac
