@@ -1,4 +1,4 @@
-# performance-tests [![Circle CI](https://circleci.com/gh/dacrome/performance-tests.svg?style=svg)](https://circleci.com/gh/dacrome/performance-tests)
+# performance-tests [![Circle CI](https://circleci.com/gh/osiam/performance-tests.svg?style=svg)](https://circleci.com/gh/osiam/performance-tests)
 
 The performance tests for OSIAM
 

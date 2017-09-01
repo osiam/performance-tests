@@ -156,7 +156,7 @@
         </repository>
         <repository>
             <id>osiam-snapshots</id>
-            <url>https://oss.jfrog.org/artifactory/repo</url>
+            <url>https://oss.jfrog.org/artifactory/oss-snapshot-local</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -320,7 +320,7 @@
                         <phase>integration-test</phase>
                         <configuration>
                             <!--<propertiesSystem>-->
-                                <!--<logback.configurationFile>logback.xml</logback.configurationFile>-->
+                            <!--<logback.configurationFile>logback.xml</logback.configurationFile>-->
                             <!--</propertiesSystem>-->
                             <propertiesJMeter>
                                 <jmeter.exit.check.pause>10000</jmeter.exit.check.pause>
